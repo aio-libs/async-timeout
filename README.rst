@@ -31,7 +31,7 @@ Installation
 
 ::
 
-   $ pip install yarl
+   $ pip install async_timeout
 
 The library is Python 3 only!
 
