@@ -1,0 +1,7 @@
+include LICENSE
+include CHANGES.rst
+include README.rst
+graft async_timeout
+graft tests
+global-exclude *.pyc
+global-exclude *.cache
