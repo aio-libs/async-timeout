@@ -19,11 +19,11 @@ that cancels a block on *timeout* expiring::
        with timeout(1.5):
            yield from inner()
 
-   1. If ``inner()`` is executed faster than in ``1.5`` seconds
-      nothing happens.
-   2. Otherwise ``inner()`` is cancelled internally by sending
-      ``asyncio.CancelledError`` into but ``asyncio.TimeoutError``
-      is raised outside of context manager scope.
+1. If ``inner()`` is executed faster than in ``1.5`` seconds nothing
+   happens.
+2. Otherwise ``inner()`` is cancelled internally by sending
+   ``asyncio.CancelledError`` into but ``asyncio.TimeoutError`` is
+   raised outside of context manager scope.
 
 
 Installation
