@@ -4,7 +4,7 @@ import re
 from setuptools import setup
 
 here = pathlib.Path(__file__).parent
-fname = here / 'async_timeout.py'
+fname = here / 'async_timeout' / '__init__.py'
 
 with fname.open() as fp:
     try:
@@ -36,7 +36,7 @@ setup(name='async_timeout',
       author_email='andrew.svetlov@gmail.com',
       url='https://github.com/aio-libs/async_timeout/',
       license='Apache 2',
-      py_modules=['asyncio_timeout'],
+      packages=['async_timeout'],
       setup_requires=['pytest-runner'],
       tests_require=['pytest', 'pytest_aiohttp'],
       include_package_data=False)
