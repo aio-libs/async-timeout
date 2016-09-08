@@ -1,23 +1,29 @@
 async_timeout
 =============
 
-asyncio-compatible timeout context manage.
+asyncio-compatible timeout context manager.
 
 
 Usage example
 -------------
 
 
-Useful in cases when you want to apply timeout logic around block
-of code or in cases when asyncio.wait_for is not suitable, e.g::
+The context manager is useful in cases when you want to apply timeout
+logic around block of code or in cases when ``asyncio.wait_for()`` is
+not suitable. Also it's much faster than ``asyncio.wait_for()``
+because ``timeout`` doesn't create a new task.
 
-   >>> with timeout(0.001):
-   ...     async with aiohttp.get('https://github.com') as r:
-   ...         await r.text()
+The ``timeout(timeout, *, loop=None)`` call returns a context manager
+that cancels a block on *timeout* expiring::
 
+       with timeout(1.5):
+           yield from inner()
 
-*timeout* - value in seconds or None to disable timeout logic
-*loop* - asyncio compatible event loop
+   1. If ``inner()`` is executed faster than in ``1.5`` seconds
+      nothing happens.
+   2. Otherwise ``inner()`` is cancelled internally by sending
+      ``asyncio.CancelledError`` into but ``asyncio.TimeoutError``
+      is raised outside of context manager scope.
 
 
 Installation
