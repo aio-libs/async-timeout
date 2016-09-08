@@ -25,6 +25,7 @@ that cancels a block on *timeout* expiring::
    ``asyncio.CancelledError`` into but ``asyncio.TimeoutError`` is
    raised outside of context manager scope.
 
+*timeout* parameter could be ``None`` for skipping timeout functionality.
 
 Installation
 ------------
