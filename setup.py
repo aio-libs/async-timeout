@@ -19,7 +19,7 @@ def read(name):
         return f.read()
 
 
-setup(name='async_timeout',
+setup(name='async-timeout',
       version=version,
       description=("Timeout context manager for asyncio programs"),
       long_description='\n\n'.join([read('README.rst'),
