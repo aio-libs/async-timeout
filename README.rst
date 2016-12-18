@@ -1,4 +1,4 @@
-async_timeout
+async-timeout
 =============
 
 asyncio-compatible timeout context manager.
@@ -32,7 +32,7 @@ Installation
 
 ::
 
-   $ pip install async_timeout
+   $ pip install async-timeout
 
 The library is Python 3 only!
 
