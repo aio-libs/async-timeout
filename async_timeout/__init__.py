@@ -1,7 +1,7 @@
 import asyncio
 
 
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 
 
 class timeout:
@@ -42,7 +42,7 @@ class timeout:
             self._cancel_handler = None
             self._task = None
             raise asyncio.TimeoutError from None
-        if self._timeout is not None:
+        if self._timeout is not None and self._cancel_handler is not None:
             self._cancel_handler.cancel()
             self._cancel_handler = None
         self._task = None
