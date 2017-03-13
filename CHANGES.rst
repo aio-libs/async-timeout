@@ -1,10 +1,12 @@
 CHANGES
 =======
 
-1.1.1 (2017-03-11)
+1.2.0 (2017-03-11)
 ------------------
 
 * Extra check on context manager exit
+
+* 0 is no-op timeout
 
 
 1.1.0 (2016-10-20)
