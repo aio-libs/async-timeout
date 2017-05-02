@@ -8,7 +8,9 @@ install:
   - pip install -e .
   - pip install docutils
   - pip install codecov
-
+  - pip install pytest
+  - pip install pytest_aiohttp
+  - pip install pytest-runner
 
 script:
   - python -m pytest tests
