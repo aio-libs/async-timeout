@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+1.2.1 (2017-05-02)
+------------------
+
+* Support unpublished event loop's "current_task" api.
+
+
 1.2.0 (2017-03-11)
 ------------------
 
