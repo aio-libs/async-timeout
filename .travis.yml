@@ -11,7 +11,7 @@ install:
 
 
 script:
-  - python setup.py test
+  - python -m pytest tests
   - python setup.py check -rm
   - if python -c "import sys; sys.exit(sys.version_info < (3,5))"; then
         python setup.py check -s;
