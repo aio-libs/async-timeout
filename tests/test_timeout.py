@@ -204,4 +204,4 @@ def test_timeout_suppress_exception_chain(loop):
         with timeout(0.01, loop=loop) as t:
             yield from asyncio.sleep(10, loop=loop)
             assert t._loop is loop
-    assert ctx.value.__suppress_context__
+    assert not ctx.value.__suppress_context__
