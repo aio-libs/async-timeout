@@ -6,14 +6,11 @@ python:
 
 install:
   - pip install -e .
-  - pip install docutils
+  - pip install -r requirements.txt
   - pip install codecov
-  - pip install pytest
-  - pip install pytest_aiohttp
-  - pip install pytest-runner
 
 script:
-  - python -m pytest tests
+  - pytest tests
   - python setup.py check -rm
   - if python -c "import sys; sys.exit(sys.version_info < (3,5))"; then
         python setup.py check -s;
