@@ -40,6 +40,4 @@ setup(name='async-timeout',
       url='https://github.com/aio-libs/async_timeout/',
       license='Apache 2',
       packages=['async_timeout'],
-      setup_requires=[],
-      tests_require=['pytest', 'pytest_aiohttp', 'pytest-runner'],
       include_package_data=False)
