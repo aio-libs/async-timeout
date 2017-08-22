@@ -201,7 +201,6 @@ def test_cancel_outer_coro(loop):
 def test_timeout_suppress_exception_chain(loop):
 
     with pytest.raises(asyncio.TimeoutError) as ctx:
-        with timeout(0.01, loop=loop) as t:
+        with timeout(0.01, loop=loop):
             yield from asyncio.sleep(10, loop=loop)
-            assert t._loop is loop
     assert not ctx.value.__suppress_context__
