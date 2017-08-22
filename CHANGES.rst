@@ -5,7 +5,7 @@ CHANGES
 ------------------
 
 * Don't suppress nested exception on timeout. Exception context points
-  on cancelled line with suspended `await`
+  on cancelled line with suspended `await` (#13)
 
 1.2.1 (2017-05-02)
 ------------------
