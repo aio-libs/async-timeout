@@ -1,7 +1,7 @@
 CHANGES
 =======
 
-1.3.0 (2017-xx-xx)
+1.3.0 (2017-08-23)
 ------------------
 
 * Don't suppress nested exception on timeout. Exception context points
