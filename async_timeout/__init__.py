@@ -72,7 +72,6 @@ class timeout:
         self._cancelled = True
 
 
-
 def current_task(loop):
     task = asyncio.Task.current_task(loop=loop)
     if task is None:
