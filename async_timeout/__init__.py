@@ -30,6 +30,24 @@ class timeout:
         self._cancel_handler = None
 
     def __enter__(self):
+        return self._do_enter()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._do_exit(exc_type)
+
+    @asyncio.coroutine
+    def __aenter__(self):
+        return self._do_enter()
+
+    @asyncio.coroutine
+    def __aexit__(self, exc_type, exc_val, exc_tb):
+        self._do_exit(exc_type)
+
+    @property
+    def expired(self):
+        return self._cancelled
+
+    def _do_enter(self):
         if self._timeout is not None:
             self._task = current_task(self._loop)
             if self._task is None:
@@ -39,7 +57,7 @@ class timeout:
                 self._timeout, self._cancel_task)
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def _do_exit(self, exc_type):
         if exc_type is asyncio.CancelledError and self._cancelled:
             self._cancel_handler = None
             self._task = None
@@ -53,9 +71,6 @@ class timeout:
         self._task.cancel()
         self._cancelled = True
 
-    @property
-    def expired(self):
-        return self._cancelled
 
 
 def current_task(loop):
