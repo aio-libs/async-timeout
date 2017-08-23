@@ -199,8 +199,31 @@ def test_cancel_outer_coro(loop):
 
 @asyncio.coroutine
 def test_timeout_suppress_exception_chain(loop):
-
     with pytest.raises(asyncio.TimeoutError) as ctx:
         with timeout(0.01, loop=loop):
             yield from asyncio.sleep(10, loop=loop)
     assert not ctx.value.__suppress_context__
+
+
+@asyncio.coroutine
+def test_timeout_expired(loop):
+    with pytest.raises(asyncio.TimeoutError):
+        with timeout(0.01, loop=loop) as cm:
+            yield from asyncio.sleep(10, loop=loop)
+    assert cm.expired
+
+
+@asyncio.coroutine
+def test_timeout_inner_timeout_error(loop):
+    with pytest.raises(asyncio.TimeoutError):
+        with timeout(0.01, loop=loop) as cm:
+            raise asyncio.TimeoutError
+    assert not cm.expired
+
+
+@asyncio.coroutine
+def test_timeout_inner_other_error(loop):
+    with pytest.raises(RuntimeError):
+        with timeout(0.01, loop=loop) as cm:
+            raise RuntimeError
+    assert not cm.expired

@@ -16,8 +16,8 @@ because ``timeout`` doesn't create a new task.
 The ``timeout(timeout, *, loop=None)`` call returns a context manager
 that cancels a block on *timeout* expiring::
 
-       with timeout(1.5):
-           yield from inner()
+   with timeout(1.5):
+       await inner()
 
 1. If ``inner()`` is executed faster than in ``1.5`` seconds nothing
    happens.
@@ -26,6 +26,20 @@ that cancels a block on *timeout* expiring::
    raised outside of context manager scope.
 
 *timeout* parameter could be ``None`` for skipping timeout functionality.
+
+
+Context manager has ``.expired`` property for check if timeout happens
+exactly in context manager::
+
+   with timeout(1.5) as cm:
+       await inner()
+   print(cm.expired)
+
+The property is ``True`` is ``inner()`` execution is cancelled by
+timeout context manager.
+
+If ``inner()`` call explicitly raises ``TimeoutError`` ``cm.expired``
+is ``False``.
 
 Installation
 ------------

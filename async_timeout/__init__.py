@@ -50,7 +50,12 @@ class timeout:
         self._task = None
 
     def _cancel_task(self):
-        self._cancelled = self._task.cancel()
+        self._task.cancel()
+        self._cancelled = True
+
+    @property
+    def expired(self):
+        return self._cancelled
 
 
 def current_task(loop):
