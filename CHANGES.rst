@@ -9,6 +9,8 @@ CHANGES
 
 * Introduce `.timeout` property (#16)
 
+* Add methods for using as async context manager (#9)
+
 1.2.1 (2017-05-02)
 ------------------
 
