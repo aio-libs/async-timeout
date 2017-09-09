@@ -227,3 +227,21 @@ def test_timeout_inner_other_error(loop):
         with timeout(0.01, loop=loop) as cm:
             raise RuntimeError
     assert not cm.expired
+
+@asyncio.coroutine
+def test_timeout_remaining(loop):
+    with timeout(None, loop=loop) as cm:
+        assert cm.remaining is None
+
+    t = timeout(1.0, loop=loop)
+    assert t.remaining is None
+
+    with timeout(1.0, loop=loop) as cm:
+        yield from asyncio.sleep(0.1, loop=loop)
+        assert cm.remaining < 1.0
+
+    with pytest.raises(asyncio.TimeoutError):
+        with timeout(0.1, loop=loop) as cm:
+            yield from asyncio.sleep(0.5, loop=loop)
+
+    assert cm.remaining == 0.0

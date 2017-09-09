@@ -28,6 +28,7 @@ class timeout:
         self._task = None
         self._cancelled = False
         self._cancel_handler = None
+        self._cancel_at = None
 
     def __enter__(self):
         return self._do_enter()
@@ -47,14 +48,21 @@ class timeout:
     def expired(self):
         return self._cancelled
 
+    @property
+    def remaining(self):
+        if self._cancel_at is not None:
+            return max(self._cancel_at - self._loop.time(), 0.0)
+        else:
+            return None
+
     def _do_enter(self):
         if self._timeout is not None:
             self._task = current_task(self._loop)
             if self._task is None:
                 raise RuntimeError('Timeout context manager should be used '
                                    'inside a task')
-            self._cancel_handler = self._loop.call_later(
-                self._timeout, self._cancel_task)
+            self._cancel_at = self._loop.time() + self._timeout
+            self._cancel_handler = self._loop.call_at(self._cancel_at, self._cancel_task)
         return self
 
     def _do_exit(self, exc_type):
