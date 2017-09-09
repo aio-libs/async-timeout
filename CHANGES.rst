@@ -1,6 +1,16 @@
 CHANGES
 =======
 
+1.4.0 (2017-09-09)
+------------------
+
+* Implement `remaining` property (#20)
+
+  * If timeout is not started yet or started unconstrained:
+    `remaining` is `None`
+  * If timeout is expired: `remaining` is `0.0`
+  * All others: roughly amount of time before `TimeoutError` is triggered
+
 1.3.0 (2017-08-23)
 ------------------
 
