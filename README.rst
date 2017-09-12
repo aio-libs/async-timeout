@@ -50,6 +50,19 @@ timeout context manager.
 If ``inner()`` call explicitly raises ``TimeoutError`` ``cm.expired``
 is ``False``.
 
+
+The ``.remaining`` and ``.elapsed`` properties can be used
+for narrowing timeout of the inner code and logging::
+
+   async with timeout(1.5) as cm:
+       await inner()
+       await another(timeout=cm.remaining)
+   print(cm.elapsed)
+
+Both properties are only updated while context manager is active.
+
+Note that ``.elapsed + .remaining`` is not accurate and can exceed the timeout.
+
 Installation
 ------------
 

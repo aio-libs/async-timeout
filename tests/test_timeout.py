@@ -242,6 +242,10 @@ async def test_timeout_inner_other_error(loop):
 async def test_timeout_remaining(loop):
     with timeout(None, loop=loop) as cm:
         assert cm.remaining is None
+    assert cm.remaining is None
+
+    t = timeout(None, loop=loop)
+    assert t.remaining is None
 
     t = timeout(1.0, loop=loop)
     assert t.remaining is None
@@ -249,6 +253,9 @@ async def test_timeout_remaining(loop):
     with timeout(1.0, loop=loop) as cm:
         await asyncio.sleep(0.1, loop=loop)
         assert cm.remaining < 1.0
+    r = cm.remaining
+    time.sleep(0.1)
+    assert r == cm.remaining
 
     with pytest.raises(asyncio.TimeoutError):
         with timeout(0.1, loop=loop) as cm:
@@ -261,3 +268,32 @@ def test_cancel_without_starting(loop):
     tm = timeout(1, loop=loop)
     tm._cancel_task()
     tm._cancel_task()  # double call should success
+
+
+@pytest.mark.asyncio
+async def test_timeout_elapsed(loop):
+    t = timeout(None, loop=loop)
+    assert t.elapsed == 0.0
+
+    t = timeout(1.0, loop=loop)
+    assert t.elapsed == 0.0
+
+    with timeout(1.0, loop=loop) as cm:
+        await asyncio.sleep(0.1, loop=loop)
+        assert cm.elapsed >= 0.1
+    e = cm.elapsed
+    assert e >= 0.1
+    time.sleep(0.1)
+    assert e == cm.elapsed
+
+    with pytest.raises(asyncio.TimeoutError):
+        with timeout(0.1, loop=loop) as cm:
+            await asyncio.sleep(0.5, loop=loop)
+    assert cm.elapsed >= 0.1
+
+    with pytest.raises(asyncio.TimeoutError):
+        with timeout(0.1, loop=loop) as cm:
+            time.sleep(0.5)
+            assert cm.elapsed >= 0.1
+            await asyncio.sleep(0.5, loop=loop)
+    assert cm.elapsed >= 0.1

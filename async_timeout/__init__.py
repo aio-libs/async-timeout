@@ -34,6 +34,8 @@ class timeout:
         self._cancelled = False
         self._cancel_handler = None  # type: Optional[asyncio.Handle]
         self._cancel_at = None  # type: Optional[float]
+        self._started_at = None  # type: Optional[float]
+        self._exited_at = None  # type: Optional[float]
 
     def __enter__(self) -> 'timeout':
         return self._do_enter()
@@ -60,10 +62,21 @@ class timeout:
 
     @property
     def remaining(self) -> Optional[float]:
-        if self._cancel_at is not None:
+        if self._cancel_at is None:
+            return None
+        elif self._exited_at is None:
             return max(self._cancel_at - self._loop.time(), 0.0)
         else:
-            return None
+            return max(self._cancel_at - self._exited_at, 0.0)
+
+    @property
+    def elapsed(self) -> float:
+        if self._started_at is None:
+            return 0.0
+        elif self._exited_at is None:
+            return self._loop.time() - self._started_at
+        else:
+            return self._exited_at - self._started_at
 
     def _do_enter(self) -> 'timeout':
         # Support Tornado 5- without timeout
@@ -80,12 +93,14 @@ class timeout:
             self._loop.call_soon(self._cancel_task)
             return self
 
-        self._cancel_at = self._loop.time() + self._timeout
+        self._started_at = self._loop.time()
+        self._cancel_at = self._started_at + self._timeout
         self._cancel_handler = self._loop.call_at(
             self._cancel_at, self._cancel_task)
         return self
 
     def _do_exit(self, exc_type: Type[BaseException]) -> None:
+        self._exited_at = self._loop.time()
         if exc_type is asyncio.CancelledError and self._cancelled:
             self._cancel_handler = None
             self._task = None
