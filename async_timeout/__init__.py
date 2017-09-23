@@ -53,11 +53,6 @@ class timeout:
         else:
             return None
 
-    def _do_timeout(self):
-        self._cancel_handler = None
-        self._task = None
-        raise asyncio.TimeoutError
-
     def _do_enter(self):
         self._task = current_task(self._loop)
         if self._task is None:
@@ -68,8 +63,8 @@ class timeout:
             return self
 
         if self._timeout <= 0:
-            self._cancel_task()
-            self._do_timeout()
+            self._task = None
+            raise asyncio.TimeoutError
 
         self._cancel_at = self._loop.time() + self._timeout
         self._cancel_handler = self._loop.call_at(
@@ -78,7 +73,9 @@ class timeout:
 
     def _do_exit(self, exc_type):
         if exc_type is asyncio.CancelledError and self._cancelled:
-            self._do_timeout()
+            self._cancel_handler = None
+            self._task = None
+            raise asyncio.TimeoutError
         if self._timeout is not None and self._cancel_handler is not None:
             self._cancel_handler.cancel()
             self._cancel_handler = None
