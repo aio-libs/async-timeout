@@ -106,9 +106,11 @@ def test_timeout_enable_zero_coro_not_started(loop):
         coro_started = True
 
     with pytest.raises(asyncio.TimeoutError):
-        with timeout(0, loop=loop):
+        cm = timeout(0, loop=loop)
+        with cm:
             yield from coro()
 
+    assert cm.expired
     assert coro_started is False
 
 
