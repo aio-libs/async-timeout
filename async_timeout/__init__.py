@@ -64,6 +64,7 @@ class timeout:
 
         if self._timeout <= 0:
             self._task = None
+            self._cancelled = True
             raise asyncio.TimeoutError
 
         self._cancel_at = self._loop.time() + self._timeout

@@ -89,8 +89,11 @@ def test_timeout_is_none_no_task(loop):
 @asyncio.coroutine
 def test_timeout_enable_zero(loop):
     with pytest.raises(asyncio.TimeoutError):
-        with timeout(0, loop=loop):
+        cm = timeout(0, loop=loop)
+        with cm:
             yield from asyncio.sleep(0.1, loop=loop)
+
+    assert cm.expired
 
 
 @asyncio.coroutine
