@@ -1,6 +1,14 @@
 CHANGES
 =======
 
+x.x.x (xxxx-xx-xx)
+------------------
+
+* Changed `timeout <= 0` behaviour
+
+  * Backward incompatibility change
+  * when timeout <= 0  `TimeoutError` raised immediately
+
 1.4.0 (2017-09-09)
 ------------------
 
