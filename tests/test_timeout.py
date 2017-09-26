@@ -245,6 +245,7 @@ def test_timeout_inner_other_error(loop):
             raise RuntimeError
     assert not cm.expired
 
+
 @asyncio.coroutine
 def test_timeout_remaining(loop):
     with timeout(None, loop=loop) as cm:
