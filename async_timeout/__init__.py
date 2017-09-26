@@ -54,13 +54,15 @@ class timeout:
             return None
 
     def _do_enter(self):
+        # Support Tornado 5- without timeout
+        # Details: https://github.com/python/asyncio/issues/392
+        if self._timeout is None:
+            return self
+
         self._task = current_task(self._loop)
         if self._task is None:
             raise RuntimeError('Timeout context manager should be used '
                                'inside a task')
-
-        if self._timeout is None:
-            return self
 
         if self._timeout <= 0:
             self._task = None
