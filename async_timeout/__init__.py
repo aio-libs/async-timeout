@@ -65,9 +65,8 @@ class timeout:
                                'inside a task')
 
         if self._timeout <= 0:
-            self._task = None
-            self._cancelled = True
-            raise asyncio.TimeoutError
+            self._loop.call_soon(self._cancel_task)
+            return self
 
         self._cancel_at = self._loop.time() + self._timeout
         self._cancel_handler = self._loop.call_at(

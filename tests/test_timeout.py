@@ -81,16 +81,14 @@ def test_timeout_disable(loop):
 
 
 def test_timeout_is_none_no_task(loop):
-    with pytest.raises(RuntimeError):
-        with timeout(None, loop=loop):
-            pass
+    with timeout(None, loop=loop) as cm:
+        assert cm._task is None
 
 
 @asyncio.coroutine
 def test_timeout_enable_zero(loop):
     with pytest.raises(asyncio.TimeoutError):
-        cm = timeout(0, loop=loop)
-        with cm:
+        with timeout(0, loop=loop) as cm:
             yield from asyncio.sleep(0.1, loop=loop)
 
     assert cm.expired
@@ -106,8 +104,8 @@ def test_timeout_enable_zero_coro_not_started(loop):
         coro_started = True
 
     with pytest.raises(asyncio.TimeoutError):
-        cm = timeout(0, loop=loop)
-        with cm:
+        with timeout(0, loop=loop) as cm:
+            yield from asyncio.sleep(0, loop=loop)
             yield from coro()
 
     assert cm.expired
