@@ -80,19 +80,36 @@ def test_timeout_disable(loop):
     assert 0.09 < dt < 0.13, dt
 
 
-@asyncio.coroutine
-def test_timeout_disable_zero(loop):
-    @asyncio.coroutine
-    def long_running_task():
-        yield from asyncio.sleep(0.1, loop=loop)
-        return 'done'
+def test_timeout_is_none_no_task(loop):
+    with timeout(None, loop=loop) as cm:
+        assert cm._task is None
 
-    t0 = loop.time()
-    with timeout(0, loop=loop):
-        resp = yield from long_running_task()
-        assert resp == 'done'
-        dt = loop.time() - t0
-        assert 0.09 < dt < 0.13, dt
+
+@asyncio.coroutine
+def test_timeout_enable_zero(loop):
+    with pytest.raises(asyncio.TimeoutError):
+        with timeout(0, loop=loop) as cm:
+            yield from asyncio.sleep(0.1, loop=loop)
+
+    assert cm.expired
+
+
+@asyncio.coroutine
+def test_timeout_enable_zero_coro_not_started(loop):
+    coro_started = False
+
+    @asyncio.coroutine
+    def coro():
+        nonlocal coro_started
+        coro_started = True
+
+    with pytest.raises(asyncio.TimeoutError):
+        with timeout(0, loop=loop) as cm:
+            yield from asyncio.sleep(0, loop=loop)
+            yield from coro()
+
+    assert cm.expired
+    assert coro_started is False
 
 
 @asyncio.coroutine
@@ -104,7 +121,7 @@ def test_timeout_not_relevant_exception(loop):
 
 
 @asyncio.coroutine
-def test_timeout_canceled_error_is_converted_to_timeout(loop):
+def test_timeout_canceled_error_is_not_converted_to_timeout(loop):
     yield from asyncio.sleep(0, loop=loop)
     with pytest.raises(asyncio.CancelledError):
         with timeout(0.001, loop=loop):
@@ -227,6 +244,7 @@ def test_timeout_inner_other_error(loop):
         with timeout(0.01, loop=loop) as cm:
             raise RuntimeError
     assert not cm.expired
+
 
 @asyncio.coroutine
 def test_timeout_remaining(loop):

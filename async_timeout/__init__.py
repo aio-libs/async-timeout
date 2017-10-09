@@ -19,8 +19,6 @@ class timeout:
     loop - asyncio compatible event loop
     """
     def __init__(self, timeout, *, loop=None):
-        if timeout is not None and timeout == 0:
-            timeout = None
         self._timeout = timeout
         if loop is None:
             loop = asyncio.get_event_loop()
@@ -56,13 +54,23 @@ class timeout:
             return None
 
     def _do_enter(self):
-        if self._timeout is not None:
-            self._task = current_task(self._loop)
-            if self._task is None:
-                raise RuntimeError('Timeout context manager should be used '
-                                   'inside a task')
-            self._cancel_at = self._loop.time() + self._timeout
-            self._cancel_handler = self._loop.call_at(self._cancel_at, self._cancel_task)
+        # Support Tornado 5- without timeout
+        # Details: https://github.com/python/asyncio/issues/392
+        if self._timeout is None:
+            return self
+
+        self._task = current_task(self._loop)
+        if self._task is None:
+            raise RuntimeError('Timeout context manager should be used '
+                               'inside a task')
+
+        if self._timeout <= 0:
+            self._loop.call_soon(self._cancel_task)
+            return self
+
+        self._cancel_at = self._loop.time() + self._timeout
+        self._cancel_handler = self._loop.call_at(
+            self._cancel_at, self._cancel_task)
         return self
 
     def _do_exit(self, exc_type):
