@@ -1,12 +1,13 @@
 CHANGES
 =======
 
-x.x.x (xxxx-xx-xx)
+2.0.0 (2017-10-09)
 ------------------
 
 * Changed `timeout <= 0` behaviour
 
-  * Backward incompatibility change, prior this version `0` was shortcut for `None`
+  * Backward incompatibility change, prior this version `0` was
+    shortcut for `None`
   * when timeout <= 0 `TimeoutError` raised faster
 
 1.4.0 (2017-09-09)
