@@ -1,9 +1,6 @@
 import asyncio
 
 
-__version__ = '2.0.0'
-
-
 class timeout:
     """timeout context manager.
 
