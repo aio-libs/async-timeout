@@ -1,7 +1,10 @@
 import asyncio
+import sys
 
 
-__version__ = '2.0.0'
+__version__ = '2.0.1'
+
+PY_37 = sys.version_info >= (3, 7)
 
 
 class timeout:
@@ -89,8 +92,12 @@ class timeout:
 
 
 def current_task(loop):
-    task = asyncio.Task.current_task(loop=loop)
+    if PY_37:
+        task = asyncio.current_task(loop=loop)
+    else:
+        task = asyncio.Task.current_task(loop=loop)
     if task is None:
+        # this should be removed, tokio must use register_task and family API
         if hasattr(loop, 'current_task'):
             task = loop.current_task()
 
