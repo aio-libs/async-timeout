@@ -1,6 +1,13 @@
 CHANGES
 =======
 
+3.0.0 (2018-05-05)
+------------------
+
+- Drop Python 3.4, the minimal supported version is Python 3.5.3
+
+- Provide type annotations
+
 2.0.1 (2018-03-13)
 ------------------
 
