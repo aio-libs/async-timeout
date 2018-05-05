@@ -255,3 +255,9 @@ async def test_timeout_remaining(loop):
             await asyncio.sleep(0.5, loop=loop)
 
     assert cm.remaining == 0.0
+
+
+def test_cancel_without_starting(loop):
+    tm = timeout(1, loop=loop)
+    tm._cancel_task()
+    tm._cancel_task()  # double call should success
