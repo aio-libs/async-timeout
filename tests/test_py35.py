@@ -4,6 +4,8 @@ import pytest
 
 from async_timeout import timeout
 
+pytestmark = pytest.mark.asyncio
+
 
 async def test_async_timeout(loop):
     with pytest.raises(asyncio.TimeoutError):

@@ -1,5 +1,6 @@
 import pathlib
 import re
+import sys
 
 from setuptools import setup
 
@@ -29,7 +30,6 @@ setup(name='async-timeout',
           'Intended Audience :: Developers',
           'Programming Language :: Python',
           'Programming Language :: Python :: 3',
-          'Programming Language :: Python :: 3.4',
           'Programming Language :: Python :: 3.5',
           'Programming Language :: Python :: 3.6',
           'Topic :: Internet :: WWW/HTTP',
@@ -40,4 +40,5 @@ setup(name='async-timeout',
       url='https://github.com/aio-libs/async_timeout/',
       license='Apache 2',
       packages=['async_timeout'],
-      include_package_data=False)
+      python_requires='>=3.5.3',
+      include_package_data=True)

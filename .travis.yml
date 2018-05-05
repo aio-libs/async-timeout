@@ -9,11 +9,7 @@ install:
   - pip install codecov
 
 script:
-  - pytest tests
-  - python setup.py check -rm
-  - if python -c "import sys; sys.exit(sys.version_info < (3,5))"; then
-        python setup.py check -s;
-    fi
+  - make test
 
 
 after_success:
@@ -29,4 +25,4 @@ deploy:
   on:
     tags: true
     all_branches: true
-    python: 3.5
+    python: 3.6
