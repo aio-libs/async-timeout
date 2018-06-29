@@ -2,7 +2,7 @@ import asyncio
 import sys
 
 from types import TracebackType
-from typing import Optional, Type
+from typing import Optional, Type, Any
 
 
 __version__ = '3.0.0'
@@ -25,12 +25,12 @@ class timeout:
     loop - asyncio compatible event loop
     """
     def __init__(self, timeout: Optional[float],
-                 *, loop: asyncio.AbstractEventLoop=None) -> None:
+                 *, loop: Optional[asyncio.AbstractEventLoop] = None) -> None:
         self._timeout = timeout
         if loop is None:
             loop = asyncio.get_event_loop()
         self._loop = loop
-        self._task = None  # type: Optional[asyncio.Task]
+        self._task = None  # type: Optional[asyncio.Task[Any]]
         self._cancelled = False
         self._cancel_handler = None  # type: Optional[asyncio.Handle]
         self._cancel_at = None  # type: Optional[float]
@@ -102,7 +102,7 @@ class timeout:
             self._cancelled = True
 
 
-def current_task(loop: asyncio.AbstractEventLoop) -> asyncio.Task:
+def current_task(loop: asyncio.AbstractEventLoop) -> 'asyncio.Task[Any]':
     if PY_37:
         task = asyncio.current_task(loop=loop)  # type: ignore
     else:

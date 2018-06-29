@@ -3,7 +3,7 @@ test: mypy check
 
 
 mypy:
-	mypy async_timeout tests
+	mypy --config-file mypy.ini async_timeout tests
 
 
 check:
