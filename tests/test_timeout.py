@@ -9,7 +9,7 @@ from async_timeout import timeout
 try:
     from asyncio import ensure_future
 except ImportError:
-    ensure_future = asyncio.async
+    ensure_future = getattr(asyncio, 'async')
 
 
 def create_future(loop):
