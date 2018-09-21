@@ -44,7 +44,7 @@ exactly in context manager::
        await inner()
    print(cm.expired)
 
-The property is ``True`` is ``inner()`` execution is cancelled by
+The property is ``True`` if ``inner()`` execution is cancelled by
 timeout context manager.
 
 If ``inner()`` call explicitly raises ``TimeoutError`` ``cm.expired``
