@@ -5,11 +5,7 @@ import time
 import pytest
 
 from async_timeout import timeout
-
-try:
-    from asyncio import ensure_future
-except ImportError:
-    ensure_future = asyncio.async
+from asyncio import ensure_future
 
 
 def create_future(loop):
