@@ -2,10 +2,10 @@ import asyncio
 import sys
 
 from types import TracebackType
-from typing import Optional, Type, Any
+from typing import Optional, Type, Any  # noqa
 
 
-__version__ = '3.0.0'
+__version__ = '3.0.1'
 
 PY_37 = sys.version_info >= (3, 7)
 
