@@ -1,7 +1,7 @@
 async-timeout
 =============
-.. image:: https://travis-ci.org/aio-libs/async-timeout.svg?branch=master
-    :target: https://travis-ci.org/aio-libs/async-timeout
+.. image:: https://travis-ci.com/aio-libs/async-timeout.svg?branch=master
+    :target: https://travis-ci.com/aio-libs/async-timeout
 .. image:: https://codecov.io/gh/aio-libs/async-timeout/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/aio-libs/async-timeout
 .. image:: https://img.shields.io/pypi/v/async-timeout.svg
