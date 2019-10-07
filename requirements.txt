@@ -1,6 +1,6 @@
 pytest==5.2.0
 pytest-asyncio==0.10.0
-pytest-cov==2.7.1
+pytest-cov==2.8.1
 docutils==0.15.2
 mypy==0.730
 -e .
