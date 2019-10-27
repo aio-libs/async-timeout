@@ -4,30 +4,32 @@ import pytest
 
 from async_timeout import timeout
 
-pytestmark = pytest.mark.asyncio
 
-
-async def test_async_timeout(loop):
+@pytest.mark.asyncio
+async def test_async_timeout():
     with pytest.raises(asyncio.TimeoutError):
-        async with timeout(0.01, loop=loop) as cm:
-            await asyncio.sleep(10, loop=loop)
+        async with timeout(0.01) as cm:
+            await asyncio.sleep(10)
     assert cm.expired
 
 
-async def test_async_no_timeout(loop):
-    async with timeout(1, loop=loop) as cm:
-        await asyncio.sleep(0, loop=loop)
+@pytest.mark.asyncio
+async def test_async_no_timeout():
+    async with timeout(1) as cm:
+        await asyncio.sleep(0)
     assert not cm.expired
 
 
-async def test_async_zero(loop):
+@pytest.mark.asyncio
+async def test_async_zero():
     with pytest.raises(asyncio.TimeoutError):
-        async with timeout(0, loop=loop) as cm:
-            await asyncio.sleep(10, loop=loop)
+        async with timeout(0) as cm:
+            await asyncio.sleep(10)
     assert cm.expired
 
 
-async def test_async_zero_coro_not_started(loop):
+@pytest.mark.asyncio
+async def test_async_zero_coro_not_started():
     coro_started = False
 
     async def coro():
@@ -35,8 +37,8 @@ async def test_async_zero_coro_not_started(loop):
         coro_started = True
 
     with pytest.raises(asyncio.TimeoutError):
-        async with timeout(0, loop=loop) as cm:
-            await asyncio.sleep(0, loop=loop)
+        async with timeout(0) as cm:
+            await asyncio.sleep(0)
             await coro()
 
     assert cm.expired
