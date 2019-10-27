@@ -26,6 +26,15 @@ class timeout:
     """
     @classmethod
     def at(cls, when: float) -> 'timeout':
+        """Schedule the timeout at absolute time.
+
+        when arguments points on the time in the same clock system
+        as loop.time().
+
+        Please note: it is not POSIX time but a time with
+        undefined starting base, e.g. the time of the system power on.
+
+        """
         ret = cls(None)
         ret._cancel_at = when
         return ret
@@ -64,10 +73,12 @@ class timeout:
 
     @property
     def expired(self) -> bool:
+        """Is timeout expired during execution?"""
         return self._cancelled
 
     @property
     def remaining(self) -> Optional[float]:
+        """Number of seconds remaining to the timeout expiring."""
         if self._cancel_at is None:
             return None
         elif self._exited_at is None:
@@ -77,6 +88,12 @@ class timeout:
 
     @property
     def elapsed(self) -> float:
+        """Number of elapsed seconds.
+
+        The time is counted starting from entering into
+        the timeout context manager.
+
+        """
         if self._started_at is None:
             return 0.0
         elif self._exited_at is None:

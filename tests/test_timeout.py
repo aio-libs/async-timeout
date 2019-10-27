@@ -276,3 +276,22 @@ async def test_timeout_elapsed():
             assert cm.elapsed >= 0.1
             await asyncio.sleep(0.5)
     assert cm.elapsed >= 0.1
+
+
+@pytest.mark.asyncio
+async def test_timeout_at():
+    loop = asyncio.get_event_loop()
+    with pytest.raises(asyncio.TimeoutError):
+        now = loop.time()
+        async with timeout.at(now + 0.01) as cm:
+            await asyncio.sleep(10)
+    assert cm.expired
+
+
+@pytest.mark.asyncio
+async def test_timeout_at_not_fired():
+    loop = asyncio.get_event_loop()
+    now = loop.time()
+    async with timeout.at(now + 1) as cm:
+        await asyncio.sleep(0)
+    assert not cm.expired

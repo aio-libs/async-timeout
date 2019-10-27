@@ -22,7 +22,7 @@ logic around block of code or in cases when ``asyncio.wait_for()`` is
 not suitable. Also it's much faster than ``asyncio.wait_for()``
 because ``timeout`` doesn't create a new task.
 
-The ``timeout(timeout, *, loop=None)`` call returns a context manager
+The ``timeout(delay, *, loop=None)`` call returns a context manager
 that cancels a block on *timeout* expiring::
 
    async with timeout(1.5):
@@ -35,6 +35,20 @@ that cancels a block on *timeout* expiring::
    raised outside of context manager scope.
 
 *timeout* parameter could be ``None`` for skipping timeout functionality.
+
+
+Alternatively, ``timeout.at(when)`` can be used for scheduling
+at the absolute time::
+
+   loop = asyncio.get_event_loop()
+   now = loop.time()
+
+   async with timeout.at(now + 1.5):
+       await inner()
+
+
+Please note: it is not POSIX time but a time with
+undefined starting base, e.g. the time of the system power on.
 
 
 Context manager has ``.expired`` property for check if timeout happens
