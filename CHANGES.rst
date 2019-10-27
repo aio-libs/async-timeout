@@ -6,6 +6,8 @@ CHANGES
 
 * Add the elapsed property (#24)
 
+* Implement `timeout.at(when)` (#117)
+
 3.0.1 (2018-10-09)
 ------------------
 
