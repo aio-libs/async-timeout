@@ -3,11 +3,13 @@ import sys
 
 from types import TracebackType
 from typing import Optional, Type, Any  # noqa
+from typing_extensions import final
 
 
 __version__ = '3.0.1'
 
 
+@final
 class timeout:
     """timeout context manager.
 
@@ -22,9 +24,15 @@ class timeout:
     timeout - value in seconds or None to disable timeout logic
     loop - asyncio compatible event loop
     """
+    @classmethod
+    def at(cls, when: float) -> 'timeout':
+        ret = cls(None)
+        ret._cancel_at = when
+        return ret
+
     def __init__(self, timeout: Optional[float],
                  *, loop: Optional[asyncio.AbstractEventLoop] = None) -> None:
-        self._timeout = timeout
+        self._delay = timeout
         if loop is None:
             loop = asyncio.get_event_loop()
         self._loop = loop
@@ -79,7 +87,7 @@ class timeout:
     def _do_enter(self) -> 'timeout':
         # Support Tornado 5- without timeout
         # Details: https://github.com/python/asyncio/issues/392
-        if self._timeout is None:
+        if self._delay is None and self._cancel_at is None:
             return self
 
         self._task = _current_task(self._loop)
@@ -87,12 +95,19 @@ class timeout:
             raise RuntimeError('Timeout context manager should be used '
                                'inside a task')
 
-        if self._timeout <= 0:
-            self._loop.call_soon(self._cancel_task)
-            return self
-
         self._started_at = self._loop.time()
-        self._cancel_at = self._started_at + self._timeout
+
+        if self._delay is not None:
+            # relative timeout mode
+            if self._delay <= 0:
+                self._loop.call_soon(self._cancel_task)
+                return self
+
+            self._cancel_at = self._started_at + self._delay
+        else:
+            # absolute timeout
+            assert self._cancel_at is not None
+
         self._cancel_handler = self._loop.call_at(
             self._cancel_at, self._cancel_task)
         return self
@@ -103,7 +118,7 @@ class timeout:
             self._cancel_handler = None
             self._task = None
             raise asyncio.TimeoutError
-        if self._timeout is not None and self._cancel_handler is not None:
+        if self._cancel_handler is not None:
             self._cancel_handler.cancel()
             self._cancel_handler = None
         self._task = None
