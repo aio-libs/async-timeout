@@ -7,8 +7,6 @@ from typing import Optional, Type, Any  # noqa
 
 __version__ = '3.0.1'
 
-PY_37 = sys.version_info >= (3, 7)
-
 
 class timeout:
     """timeout context manager.
@@ -118,13 +116,7 @@ class timeout:
 
 
 def _current_task(loop: asyncio.AbstractEventLoop) -> 'asyncio.Task[Any]':
-    if PY_37:
-        task = asyncio.current_task(loop=loop)  # type: ignore
+    if sys.version_info >= (3, 7):
+        return asyncio.current_task(loop=loop)
     else:
-        task = asyncio.Task.current_task(loop=loop)
-    if task is None:
-        # this should be removed, tokio must use register_task and family API
-        if hasattr(loop, 'current_task'):
-            task = loop.current_task()  # type: ignore
-
-    return task
+        return asyncio.Task.current_task(loop=loop)
