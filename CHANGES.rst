@@ -1,17 +1,22 @@
 CHANGES
 =======
 
+3.1.0 (2019-10-XX)
+------------------
+
+* Add the elapsed property (#24)
+
 3.0.1 (2018-10-09)
 ------------------
 
-- More aggressive typing (#48)
+* More aggressive typing (#48)
 
 3.0.0 (2018-05-05)
 ------------------
 
-- Drop Python 3.4, the minimal supported version is Python 3.5.3
+* Drop Python 3.4, the minimal supported version is Python 3.5.3
 
-- Provide type annotations
+* Provide type annotations
 
 2.0.1 (2018-03-13)
 ------------------
