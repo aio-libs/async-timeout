@@ -84,7 +84,7 @@ class timeout:
         if self._timeout is None:
             return self
 
-        self._task = current_task(self._loop)
+        self._task = _current_task(self._loop)
         if self._task is None:
             raise RuntimeError('Timeout context manager should be used '
                                'inside a task')
@@ -117,7 +117,7 @@ class timeout:
             self._cancelled = True
 
 
-def current_task(loop: asyncio.AbstractEventLoop) -> 'asyncio.Task[Any]':
+def _current_task(loop: asyncio.AbstractEventLoop) -> 'asyncio.Task[Any]':
     if PY_37:
         task = asyncio.current_task(loop=loop)  # type: ignore
     else:
