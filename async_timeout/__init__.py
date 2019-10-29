@@ -2,11 +2,11 @@ import asyncio
 import sys
 
 from types import TracebackType
-from typing import Optional, Type, Any  # noqa
+from typing import Any, Optional, Type
 from typing_extensions import final
 
 
-__version__ = '3.0.1'
+__version__ = '4.0.0a0'
 
 
 @final
@@ -21,9 +21,13 @@ class timeout:
     ...         await r.text()
 
 
-    timeout - value in seconds or None to disable timeout logic
-    loop - asyncio compatible event loop
+    delay - value in seconds or None to disable timeout logic
     """
+
+    def __init_subclass__(cls: Type['timeout']) -> None:
+        raise TypeError("Inheritance class {} from timeout "
+                        "is forbidden".format(cls.__name__))
+
     @classmethod
     def at(cls, when: float) -> 'timeout':
         """Schedule the timeout at absolute time.
@@ -35,25 +39,32 @@ class timeout:
         undefined starting base, e.g. the time of the system power on.
 
         """
-        ret = cls(None)
+        ret = object.__new__(cls)
+        ret._init()
         ret._cancel_at = when
+        ret._do_enter()
         return ret
 
-    def __init__(self, timeout: Optional[float],
-                 *, loop: Optional[asyncio.AbstractEventLoop] = None) -> None:
-        self._delay = timeout
-        if loop is None:
-            loop = asyncio.get_event_loop()
+    def __init__(self, delay: Optional[float]) -> None:
+        self._init()
+        if delay is not None:
+            self._cancel_at = max(self._loop.time() + delay,
+                                  self._started_at)
+        else:
+            self._cancel_at = None
+        self._do_enter()
+
+    def _init(self):
+        loop = _get_running_loop()
         self._loop = loop
         self._task = None  # type: Optional[asyncio.Task[Any]]
         self._cancelled = False
         self._cancel_handler = None  # type: Optional[asyncio.Handle]
-        self._cancel_at = None  # type: Optional[float]
-        self._started_at = None  # type: Optional[float]
+        self._started_at = loop.time()
         self._exited_at = None  # type: Optional[float]
 
     def __enter__(self) -> 'timeout':
-        return self._do_enter()
+        return self
 
     def __exit__(self,
                  exc_type: Type[BaseException],
@@ -63,7 +74,7 @@ class timeout:
         return None
 
     async def __aenter__(self) -> 'timeout':
-        return self._do_enter()
+        return self
 
     async def __aexit__(self,
                         exc_type: Type[BaseException],
@@ -94,40 +105,25 @@ class timeout:
         the timeout context manager.
 
         """
-        if self._started_at is None:
-            return 0.0
-        elif self._exited_at is None:
+        if self._exited_at is None:
             return self._loop.time() - self._started_at
         else:
             return self._exited_at - self._started_at
 
-    def _do_enter(self) -> 'timeout':
+    def _do_enter(self) -> None:
         # Support Tornado 5- without timeout
         # Details: https://github.com/python/asyncio/issues/392
-        if self._delay is None and self._cancel_at is None:
-            return self
+        if self._cancel_at is None:
+            return
 
         self._task = _current_task(self._loop)
         if self._task is None:
             raise RuntimeError('Timeout context manager should be used '
                                'inside a task')
 
-        self._started_at = self._loop.time()
-
-        if self._delay is not None:
-            # relative timeout mode
-            if self._delay <= 0:
-                self._loop.call_soon(self._cancel_task)
-                return self
-
-            self._cancel_at = self._started_at + self._delay
-        else:
-            # absolute timeout
-            assert self._cancel_at is not None
-
         self._cancel_handler = self._loop.call_at(
             self._cancel_at, self._cancel_task)
-        return self
+        return
 
     def _do_exit(self, exc_type: Type[BaseException]) -> None:
         self._exited_at = self._loop.time()
@@ -152,3 +148,7 @@ def _current_task(loop: asyncio.AbstractEventLoop) -> 'asyncio.Task[Any]':
         return asyncio.current_task(loop=loop)
     else:
         return asyncio.Task.current_task(loop=loop)
+
+
+def _get_running_loop() -> asyncio.AbstractEventLoop:
+    return asyncio.get_event_loop()

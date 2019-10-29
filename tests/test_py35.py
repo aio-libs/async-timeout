@@ -38,7 +38,7 @@ async def test_async_zero_coro_not_started():
 
     with pytest.raises(asyncio.TimeoutError):
         async with timeout(0) as cm:
-            await asyncio.sleep(0)
+            await asyncio.sleep(0.01)
             await coro()
 
     assert cm.expired
