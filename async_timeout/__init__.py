@@ -88,6 +88,14 @@ class timeout:
         return self._cancelled
 
     @property
+    def started_at(self) -> float:
+        return self._started_at
+
+    @property
+    def finished_at(self) -> Optional[float]:
+        return self._exited_at
+
+    @property
     def remaining(self) -> Optional[float]:
         """Number of seconds remaining to the timeout expiring."""
         if self._cancel_at is None:
@@ -122,7 +130,7 @@ class timeout:
                                'inside a task')
 
         self._cancel_handler = self._loop.call_at(
-            self._cancel_at, self._cancel_task)
+            self._cancel_at, self.reject)
         return
 
     def _do_exit(self, exc_type: Type[BaseException]) -> None:
@@ -137,7 +145,9 @@ class timeout:
         self._task = None
         return None
 
-    def _cancel_task(self) -> None:
+    def reject(self) -> None:
+        # cancel is maybe better name but
+        # task.cancel() raises CancelledError in asyncio world.
         if self._task is not None:
             self._task.cancel()
             self._cancelled = True
