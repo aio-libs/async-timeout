@@ -146,6 +146,7 @@ class timeout:
         return None
 
     def reject(self) -> None:
+        """Reject scheduled timeout if any."""
         # cancel is maybe better name but
         # task.cancel() raises CancelledError in asyncio world.
         if self._task is not None:
