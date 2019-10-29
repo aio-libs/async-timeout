@@ -130,7 +130,7 @@ class timeout:
                                'inside a task')
 
         self._cancel_handler = self._loop.call_at(
-            self._cancel_at, self.reject)
+            self._cancel_at, self._on_timeout)
         return
 
     def _do_exit(self, exc_type: Type[BaseException]) -> None:
@@ -139,9 +139,8 @@ class timeout:
             self._cancel_handler = None
             self._task = None
             raise asyncio.TimeoutError
-        if self._cancel_handler is not None:
-            self._cancel_handler.cancel()
-            self._cancel_handler = None
+        # no timeout is expired
+        self.reject()
         self._task = None
         return None
 
@@ -149,6 +148,11 @@ class timeout:
         """Reject scheduled timeout if any."""
         # cancel is maybe better name but
         # task.cancel() raises CancelledError in asyncio world.
+        if self._cancel_handler is not None:
+            self._cancel_handler.cancel()
+            self._cancel_handler = None
+
+    def _on_timeout(self) -> None:
         if self._task is not None:
             self._task.cancel()
             self._cancelled = True
