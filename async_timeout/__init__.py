@@ -9,8 +9,7 @@ from typing_extensions import final
 __version__ = '4.0.0a0'
 
 
-@final
-class timeout:
+def timeout(delay: Optional[float]) -> 'Timeout':
     """timeout context manager.
 
     Useful in cases when you want to apply timeout logic around block
@@ -23,47 +22,66 @@ class timeout:
 
     delay - value in seconds or None to disable timeout logic
     """
+    loop = _get_running_loop()
+    if delay is not None:
+        when = loop.time() + delay  # type: Optional[float]
+    else:
+        when = None
+    return Timeout(when, loop)
 
-    def __init_subclass__(cls: Type['timeout']) -> None:
+
+def timeout_at(when: Optional[float]) -> 'Timeout':
+    """Schedule the timeout at absolute time.
+
+    when arguments points on the time in the same clock system
+    as loop.time().
+
+    Please note: it is not POSIX time but a time with
+    undefined starting base, e.g. the time of the system power on.
+    """
+    loop = _get_running_loop()
+    return Timeout(when, loop)
+
+
+@final
+class Timeout:
+    # Internal class, please don't instantiate it directly
+    # Use timeout() and timeout_at() public factories instead.
+
+    def __init_subclass__(cls: Type['Timeout']) -> None:
         raise TypeError("Inheritance class {} from timeout "
                         "is forbidden".format(cls.__name__))
 
-    @classmethod
-    def at(cls, when: float) -> 'timeout':
-        """Schedule the timeout at absolute time.
-
-        when arguments points on the time in the same clock system
-        as loop.time().
-
-        Please note: it is not POSIX time but a time with
-        undefined starting base, e.g. the time of the system power on.
-
-        """
-        ret = object.__new__(cls)
-        ret._init()
-        ret._cancel_at = when
-        ret._do_enter()
-        return ret
-
-    def __init__(self, delay: Optional[float]) -> None:
-        self._init()
-        if delay is not None:
-            self._cancel_at = max(self._loop.time() + delay,
-                                  self._started_at)
-        else:
-            self._cancel_at = None
-        self._do_enter()
-
-    def _init(self):
-        loop = _get_running_loop()
+    def __init__(
+            self,
+            when: Optional[float],
+            loop: asyncio.AbstractEventLoop
+    ) -> None:
+        now = loop.time()
+        if when is not None:
+            when = max(when, now)
+        self._started_at = now
+        self._cancel_at = when
         self._loop = loop
-        self._task = None  # type: Optional[asyncio.Task[Any]]
         self._cancelled = False
-        self._cancel_handler = None  # type: Optional[asyncio.Handle]
-        self._started_at = loop.time()
         self._exited_at = None  # type: Optional[float]
 
-    def __enter__(self) -> 'timeout':
+        # Support Tornado<5.0 without timeout
+        # Details: https://github.com/python/asyncio/issues/392
+
+        if self._cancel_at is None:
+            self._task = None  # type: Optional[asyncio.Task[Any]]
+            self._cancel_handler = None  # type: Optional[asyncio.Handle]
+        else:
+            self._task = _current_task(self._loop)
+            if self._task is None:
+                raise RuntimeError('Timeout context manager should be used '
+                                   'inside a task')
+
+            self._cancel_handler = self._loop.call_at(
+                self._cancel_at, self._on_timeout)
+
+    def __enter__(self) -> 'Timeout':
         return self
 
     def __exit__(self,
@@ -73,7 +91,7 @@ class timeout:
         self._do_exit(exc_type)
         return None
 
-    async def __aenter__(self) -> 'timeout':
+    async def __aenter__(self) -> 'Timeout':
         return self
 
     async def __aexit__(self,
@@ -117,21 +135,6 @@ class timeout:
             return self._loop.time() - self._started_at
         else:
             return self._exited_at - self._started_at
-
-    def _do_enter(self) -> None:
-        # Support Tornado 5- without timeout
-        # Details: https://github.com/python/asyncio/issues/392
-        if self._cancel_at is None:
-            return
-
-        self._task = _current_task(self._loop)
-        if self._task is None:
-            raise RuntimeError('Timeout context manager should be used '
-                               'inside a task')
-
-        self._cancel_handler = self._loop.call_at(
-            self._cancel_at, self._on_timeout)
-        return
 
     def _do_exit(self, exc_type: Type[BaseException]) -> None:
         self._exited_at = self._loop.time()
