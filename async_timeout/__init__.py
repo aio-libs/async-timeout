@@ -142,7 +142,7 @@ class Timeout:
             self._cancel_handler = None
             self._task = None
             raise asyncio.TimeoutError
-        # no timeout is expired
+        # timeout is not expired
         self.reject()
         self._task = None
         return None
