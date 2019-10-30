@@ -110,7 +110,7 @@ class Timeout:
         return self._entered_at
 
     @property
-    def finished_at(self) -> Optional[float]:
+    def exited_at(self) -> Optional[float]:
         return self._exited_at
 
     @property
