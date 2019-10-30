@@ -60,7 +60,7 @@ class Timeout:
         now = loop.time()
         if when is not None:
             when = max(when, now)
-        self._started_at = now
+        self._entered_at = now
         self._cancel_at = when
         self._loop = loop
         self._cancelled = False
@@ -106,8 +106,8 @@ class Timeout:
         return self._cancelled
 
     @property
-    def started_at(self) -> float:
-        return self._started_at
+    def entered_at(self) -> float:
+        return self._entered_at
 
     @property
     def finished_at(self) -> Optional[float]:
@@ -132,9 +132,9 @@ class Timeout:
 
         """
         if self._exited_at is None:
-            return self._loop.time() - self._started_at
+            return self._loop.time() - self._entered_at
         else:
-            return self._exited_at - self._started_at
+            return self._exited_at - self._entered_at
 
     def _do_exit(self, exc_type: Type[BaseException]) -> None:
         self._exited_at = self._loop.time()
