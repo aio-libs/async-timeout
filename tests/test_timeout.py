@@ -54,7 +54,7 @@ async def test_timeout_disable():
 
 def test_timeout_is_none_no_task():
     with timeout(None) as cm:
-        assert cm._cancel_handler is None
+        assert cm._timeout_handler is None
 
 
 @pytest.mark.asyncio
@@ -311,7 +311,7 @@ async def test_expired_after_rejecting():
 @pytest.mark.asyncio
 async def test_expired_after_timeout():
     with pytest.raises(asyncio.TimeoutError):
-        with timeout(0) as t:
+        async with timeout(0) as t:
             assert not t.expired
             await asyncio.sleep(10)
     assert t.expired

@@ -50,6 +50,15 @@ def timeout_at(when: Optional[float]) -> 'Timeout':
 class Timeout:
     # Internal class, please don't instantiate it directly
     # Use timeout() and timeout_at() public factories instead.
+    #
+    # Implementation note: `async with timeout()` is preferred
+    # over `with timeout()`.
+    # While technically the Timeout class implementation
+    # doesn't need to be async at all,
+    # the `async with` statement explicitly points that
+    # the context manager should be used from async function context.
+    #
+    # This design allows to avoid many silly misusages.
 
     def __init__(
             self,
@@ -60,24 +69,24 @@ class Timeout:
         if when is not None:
             when = max(when, now)
         self._started_at = now
-        self._cancel_at = when
+        self._timeout_at = when
         self._loop = loop
-        self._cancelled = False
+        self._expired = False
         self._finished_at = None  # type: Optional[float]
 
         # Support Tornado<5.0 without timeout
         # Details: https://github.com/python/asyncio/issues/392
 
-        if self._cancel_at is None:
-            self._cancel_handler = None  # type: Optional[asyncio.Handle]
+        if self._timeout_at is None:
+            self._timeout_handler = None  # type: Optional[asyncio.Handle]
         else:
             task = _current_task(self._loop)
             if task is None:
                 raise RuntimeError('Timeout context manager should be used '
                                    'inside a task')
 
-            self._cancel_handler = self._loop.call_at(
-                self._cancel_at, self._on_timeout, task)
+            self._timeout_handler = self._loop.call_at(
+                self._timeout_at, self._on_timeout, task)
 
     def __enter__(self) -> 'Timeout':
         return self
@@ -101,7 +110,7 @@ class Timeout:
     @property
     def expired(self) -> bool:
         """Is timeout expired during execution?"""
-        return self._cancelled
+        return self._expired
 
     @property
     def started_at(self) -> float:
@@ -112,14 +121,18 @@ class Timeout:
         return self._finished_at
 
     @property
+    def timeout_at(self) -> Optional[float]:
+        return self._timeout_at
+
+    @property
     def remaining(self) -> Optional[float]:
         """Number of seconds remaining to the timeout expiring."""
-        if self._cancel_at is None:
+        if self._timeout_at is None:
             return None
         elif self._finished_at is None:
-            return max(self._cancel_at - self._loop.time(), 0.0)
+            return max(self._timeout_at - self._loop.time(), 0.0)
         else:
-            return max(self._cancel_at - self._finished_at, 0.0)
+            return max(self._timeout_at - self._finished_at, 0.0)
 
     @property
     def elapsed(self) -> float:
@@ -136,8 +149,8 @@ class Timeout:
 
     def _do_exit(self, exc_type: Type[BaseException]) -> None:
         self._finished_at = self._loop.time()
-        if exc_type is asyncio.CancelledError and self._cancelled:
-            self._cancel_handler = None
+        if exc_type is asyncio.CancelledError and self._expired:
+            self._timeout_handler = None
             raise asyncio.TimeoutError
         # timeout is not expired
         self.reject()
@@ -147,13 +160,13 @@ class Timeout:
         """Reject scheduled timeout if any."""
         # cancel is maybe better name but
         # task.cancel() raises CancelledError in asyncio world.
-        if self._cancel_handler is not None:
-            self._cancel_handler.cancel()
-            self._cancel_handler = None
+        if self._timeout_handler is not None:
+            self._timeout_handler.cancel()
+            self._timeout_handler = None
 
     def _on_timeout(self, task: 'asyncio.Task[None]') -> None:
         task.cancel()
-        self._cancelled = True
+        self._expired = True
 
 
 def _current_task(loop: asyncio.AbstractEventLoop) -> 'asyncio.Task[Any]':
