@@ -1,10 +1,11 @@
 import asyncio
 import os
 import time
+import sys
 
 import pytest
 
-from async_timeout import timeout, timeout_at
+from async_timeout import timeout, timeout_at, Timeout
 
 
 @pytest.mark.asyncio
@@ -288,3 +289,21 @@ async def test_timeout_at_not_fired():
     async with timeout_at(now + 1) as cm:
         await asyncio.sleep(0)
     assert not cm.expired
+
+
+
+@pytest.mark.asyncio
+async def test_started_at():
+    loop = asyncio.get_event_loop()
+    t1 = loop.time()
+    t = timeout(10)
+    t2 = loop.time()
+    assert t1 <= t.started_at <= t2
+
+
+@pytest.mark.asyncio
+async def test_expired():
+    t = timeout(10)
+    assert not t.expired
+    t.reject()
+    assert not t.expired

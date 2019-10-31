@@ -9,6 +9,9 @@ from typing_extensions import final
 __version__ = '4.0.0a0'
 
 
+__all__ = ('timeout', 'timeout_at')
+
+
 def timeout(delay: Optional[float]) -> 'Timeout':
     """timeout context manager.
 
@@ -47,10 +50,6 @@ def timeout_at(when: Optional[float]) -> 'Timeout':
 class Timeout:
     # Internal class, please don't instantiate it directly
     # Use timeout() and timeout_at() public factories instead.
-
-    def __init_subclass__(cls: Type['Timeout']) -> None:
-        raise TypeError("Inheritance class {} from timeout "
-                        "is forbidden".format(cls.__name__))
 
     def __init__(
             self,
