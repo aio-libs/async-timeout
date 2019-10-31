@@ -60,11 +60,11 @@ class Timeout:
         now = loop.time()
         if when is not None:
             when = max(when, now)
-        self._entered_at = now
+        self._started_at = now
         self._cancel_at = when
         self._loop = loop
         self._cancelled = False
-        self._exited_at = None  # type: Optional[float]
+        self._finished_at = None  # type: Optional[float]
 
         # Support Tornado<5.0 without timeout
         # Details: https://github.com/python/asyncio/issues/392
@@ -106,22 +106,22 @@ class Timeout:
         return self._cancelled
 
     @property
-    def entered_at(self) -> float:
-        return self._entered_at
+    def started_at(self) -> float:
+        return self._started_at
 
     @property
-    def exited_at(self) -> Optional[float]:
-        return self._exited_at
+    def finished_at(self) -> Optional[float]:
+        return self._finished_at
 
     @property
     def remaining(self) -> Optional[float]:
         """Number of seconds remaining to the timeout expiring."""
         if self._cancel_at is None:
             return None
-        elif self._exited_at is None:
+        elif self._finished_at is None:
             return max(self._cancel_at - self._loop.time(), 0.0)
         else:
-            return max(self._cancel_at - self._exited_at, 0.0)
+            return max(self._cancel_at - self._finished_at, 0.0)
 
     @property
     def elapsed(self) -> float:
@@ -131,13 +131,13 @@ class Timeout:
         the timeout context manager.
 
         """
-        if self._exited_at is None:
-            return self._loop.time() - self._entered_at
+        if self._finished_at is None:
+            return self._loop.time() - self._started_at
         else:
-            return self._exited_at - self._entered_at
+            return self._finished_at - self._started_at
 
     def _do_exit(self, exc_type: Type[BaseException]) -> None:
-        self._exited_at = self._loop.time()
+        self._finished_at = self._loop.time()
         if exc_type is asyncio.CancelledError and self._cancelled:
             self._cancel_handler = None
             self._task = None
