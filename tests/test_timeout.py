@@ -1,11 +1,10 @@
 import asyncio
 import os
 import time
-import sys
 
 import pytest
 
-from async_timeout import timeout, timeout_at, Timeout
+from async_timeout import timeout, timeout_at
 
 
 @pytest.mark.asyncio
@@ -55,7 +54,7 @@ async def test_timeout_disable():
 
 def test_timeout_is_none_no_task():
     with timeout(None) as cm:
-        assert cm._task is None
+        assert cm._cancel_handler is None
 
 
 @pytest.mark.asyncio

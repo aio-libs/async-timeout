@@ -69,16 +69,15 @@ class Timeout:
         # Details: https://github.com/python/asyncio/issues/392
 
         if self._cancel_at is None:
-            self._task = None  # type: Optional[asyncio.Task[Any]]
             self._cancel_handler = None  # type: Optional[asyncio.Handle]
         else:
-            self._task = _current_task(self._loop)
-            if self._task is None:
+            task = _current_task(self._loop)
+            if task is None:
                 raise RuntimeError('Timeout context manager should be used '
                                    'inside a task')
 
             self._cancel_handler = self._loop.call_at(
-                self._cancel_at, self._on_timeout)
+                self._cancel_at, self._on_timeout, task)
 
     def __enter__(self) -> 'Timeout':
         return self
@@ -139,11 +138,9 @@ class Timeout:
         self._finished_at = self._loop.time()
         if exc_type is asyncio.CancelledError and self._cancelled:
             self._cancel_handler = None
-            self._task = None
             raise asyncio.TimeoutError
         # timeout is not expired
         self.reject()
-        self._task = None
         return None
 
     def reject(self) -> None:
@@ -154,10 +151,9 @@ class Timeout:
             self._cancel_handler.cancel()
             self._cancel_handler = None
 
-    def _on_timeout(self) -> None:
-        if self._task is not None:
-            self._task.cancel()
-            self._cancelled = True
+    def _on_timeout(self, task: 'asyncio.Task[None]') -> None:
+        task.cancel()
+        self._cancelled = True
 
 
 def _current_task(loop: asyncio.AbstractEventLoop) -> 'asyncio.Task[Any]':
