@@ -217,61 +217,6 @@ async def test_timeout_inner_other_error():
 
 
 @pytest.mark.asyncio
-async def xtest_timeout_remaining():
-    with timeout(None) as cm:
-        assert cm.remaining is None
-    assert cm.remaining is None
-
-    t = timeout(None)
-    assert t.remaining is None
-
-    t = timeout(1.0)
-    assert t.remaining is None
-
-    with timeout(1.0) as cm:
-        await asyncio.sleep(0.1)
-        assert cm.remaining < 1.0
-    r = cm.remaining
-    time.sleep(0.1)
-    assert r == cm.remaining
-
-    with pytest.raises(asyncio.TimeoutError):
-        with timeout(0.1) as cm:
-            await asyncio.sleep(0.5)
-
-    assert cm.remaining == 0.0
-
-
-@pytest.mark.asyncio
-async def xtest_timeout_elapsed():
-    t = timeout(None)
-    assert t.elapsed == 0.0
-
-    t = timeout(1.0)
-    assert t.elapsed == 0.0
-
-    with timeout(1.0) as cm:
-        await asyncio.sleep(0.1)
-        assert cm.elapsed >= 0.1
-    e = cm.elapsed
-    assert e >= 0.1
-    time.sleep(0.1)
-    assert e == cm.elapsed
-
-    with pytest.raises(asyncio.TimeoutError):
-        with timeout(0.1) as cm:
-            await asyncio.sleep(0.5)
-    assert cm.elapsed >= 0.1
-
-    with pytest.raises(asyncio.TimeoutError):
-        with timeout(0.1) as cm:
-            time.sleep(0.5)
-            assert cm.elapsed >= 0.1
-            await asyncio.sleep(0.5)
-    assert cm.elapsed >= 0.1
-
-
-@pytest.mark.asyncio
 async def test_timeout_at():
     loop = asyncio.get_event_loop()
     with pytest.raises(asyncio.TimeoutError):

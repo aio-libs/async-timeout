@@ -124,29 +124,6 @@ class Timeout:
     def timeout_at(self) -> Optional[float]:
         return self._timeout_at
 
-    @property
-    def remaining(self) -> Optional[float]:
-        """Number of seconds remaining to the timeout expiring."""
-        if self._timeout_at is None:
-            return None
-        elif self._finished_at is None:
-            return max(self._timeout_at - self._loop.time(), 0.0)
-        else:
-            return max(self._timeout_at - self._finished_at, 0.0)
-
-    @property
-    def elapsed(self) -> float:
-        """Number of elapsed seconds.
-
-        The time is counted starting from entering into
-        the timeout context manager.
-
-        """
-        if self._finished_at is None:
-            return self._loop.time() - self._started_at
-        else:
-            return self._finished_at - self._started_at
-
     def _do_exit(self, exc_type: Type[BaseException]) -> None:
         self._finished_at = self._loop.time()
         if exc_type is asyncio.CancelledError and self._expired:
