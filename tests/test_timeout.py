@@ -301,8 +301,17 @@ async def test_started_at():
 
 
 @pytest.mark.asyncio
-async def test_expired():
+async def test_expired_after_rejecting():
     t = timeout(10)
     assert not t.expired
     t.reject()
     assert not t.expired
+
+
+@pytest.mark.asyncio
+async def test_expired_after_timeout():
+    with pytest.raises(asyncio.TimeoutError):
+        with timeout(0) as t:
+            assert not t.expired
+            await asyncio.sleep(10)
+    assert t.expired
