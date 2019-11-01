@@ -18,7 +18,7 @@ def timeout(delay: Optional[float]) -> 'Timeout':
     Useful in cases when you want to apply timeout logic around block
     of code or in cases when asyncio.wait_for is not suitable. For example:
 
-    >>> with timeout(0.001):
+    >>> async with timeout(0.001):
     ...     async with aiohttp.get('https://github.com') as r:
     ...         await r.text()
 
@@ -41,6 +41,12 @@ def timeout_at(when: Optional[float]) -> 'Timeout':
 
     Please note: it is not POSIX time but a time with
     undefined starting base, e.g. the time of the system power on.
+
+    >>> async with timeout_at(loop.time() + 10):
+    ...     async with aiohttp.get('https://github.com') as r:
+    ...         await r.text()
+
+
     """
     loop = _get_running_loop("timeout_at")
     return Timeout(when, loop)
