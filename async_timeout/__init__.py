@@ -1,4 +1,5 @@
 import asyncio
+import enum
 import sys
 
 from types import TracebackType
@@ -52,6 +53,13 @@ def timeout_at(deadline: Optional[float]) -> 'Timeout':
     return Timeout(deadline, loop)
 
 
+class _State(enum.Enum):
+    INIT = "init"
+    ENTER = "enter"
+    TIMEOUT = "timeout"
+    EXIT = "exit"
+
+
 @final
 class Timeout:
     # Internal class, please don't instantiate it directly
@@ -71,7 +79,7 @@ class Timeout:
     # The purpose is to time out as sson as possible
     # without waiting for the next await expression.
 
-    __slots__ = ('_deadline', '_loop', '_expired', '_exited',
+    __slots__ = ('_deadline', '_loop', '_state',
                  '_task', '_timeout_handler')
 
     def __init__(
@@ -80,8 +88,7 @@ class Timeout:
             loop: asyncio.AbstractEventLoop
     ) -> None:
         self._loop = loop
-        self._expired = False
-        self._exited = False
+        self._state = _State.INIT
 
         task = _current_task(self._loop)
         self._task = task
@@ -93,6 +100,7 @@ class Timeout:
             self.shift_at(deadline)
 
     def __enter__(self) -> 'Timeout':
+        self._do_enter()
         return self
 
     def __exit__(self,
@@ -103,6 +111,7 @@ class Timeout:
         return None
 
     async def __aenter__(self) -> 'Timeout':
+        self._do_enter()
         return self
 
     async def __aexit__(self,
@@ -115,7 +124,7 @@ class Timeout:
     @property
     def expired(self) -> bool:
         """Is timeout expired during execution?"""
-        return self._expired
+        return self._state == _State.TIMEOUT
 
     @property
     def deadline(self) -> Optional[float]:
@@ -125,6 +134,11 @@ class Timeout:
         """Reject scheduled timeout if any."""
         # cancel is maybe better name but
         # task.cancel() raises CancelledError in asyncio world.
+        if self._state not in (_State.INIT, _State.ENTER):
+            raise RuntimeError("invalid state {}".format(self._state))
+        self._reject()
+
+    def _reject(self) -> None:
         if self._timeout_handler is not None:
             self._timeout_handler.cancel()
             self._timeout_handler = None
@@ -144,10 +158,10 @@ class Timeout:
         If new deadline is in the past
         the timeout is raised immediatelly.
         """
-        if self._exited:
+        if self._state == _State.EXIT:
             raise RuntimeError("cannot reschedule "
                                "after exit from context manager")
-        if self._expired:
+        if self._state == _State.TIMEOUT:
             raise RuntimeError("cannot reschedule expired timeout")
         if self._timeout_handler is not None:
             self._timeout_handler.cancel()
@@ -162,18 +176,26 @@ class Timeout:
             self._task
         )
 
+    def _do_enter(self) -> None:
+        if self._state != _State.INIT:
+            raise RuntimeError("invalid state {}".format(self._state))
+        self._state = _State.ENTER
+
     def _do_exit(self, exc_type: Type[BaseException]) -> None:
-        self._exited = True
-        if exc_type is asyncio.CancelledError and self._expired:
+        if (
+            exc_type is asyncio.CancelledError and
+            self._state == _State.TIMEOUT
+        ):
             self._timeout_handler = None
             raise asyncio.TimeoutError
         # timeout is not expired
-        self.reject()
+        self._state = _State.EXIT
+        self._reject()
         return None
 
     def _on_timeout(self, task: 'asyncio.Task[None]') -> None:
         task.cancel()
-        self._expired = True
+        self._state = _State.TIMEOUT
 
 
 def _current_task(loop: asyncio.AbstractEventLoop) -> 'asyncio.Task[Any]':
