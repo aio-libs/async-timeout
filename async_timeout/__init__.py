@@ -127,8 +127,13 @@ class Timeout:
             self._timeout_handler = None
 
     def shift(self, delay: float) -> None:
-        now = self._loop.time()
-        self.shift_at(now + delay)
+        """Advance timeout on delay seconds.
+
+        The delay can be negative.
+        """
+        if self._deadline is None:
+            raise RuntimeError("shifting timeout without deadline")
+        self.shift_at(self._deadline + delay)
 
     def shift_at(self, deadline: float) -> None:
         if self._timeout_handler is not None:
