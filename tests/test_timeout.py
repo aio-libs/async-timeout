@@ -235,16 +235,6 @@ async def test_timeout_at_not_fired():
     assert not cm.expired
 
 
-
-@pytest.mark.asyncio
-async def test_started_at():
-    loop = asyncio.get_event_loop()
-    t1 = loop.time()
-    t = timeout(10)
-    t2 = loop.time()
-    assert t1 <= t.started_at <= t2
-
-
 @pytest.mark.asyncio
 async def test_expired_after_rejecting():
     t = timeout(10)
