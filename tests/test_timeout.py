@@ -293,7 +293,7 @@ async def test_shift_none_deadline():
 @pytest.mark.asyncio
 async def test_shift_negative_expired():
     async with timeout(1) as cm:
-        with pytest.raises(asyncio.TimeoutError):
+        with pytest.raises(asyncio.CancelledError):
             cm.shift(-1)
 
 
@@ -303,8 +303,10 @@ async def test_shift_expired():
     async with timeout(0.001) as cm:
         with pytest.raises(asyncio.CancelledError):
             await asyncio.sleep(10)
-        with pytest.raises(RuntimeError,
-                           match="cannot reschedule expired timeout"):
+        with pytest.raises(
+            RuntimeError,
+            match="cannot reschedule expired timeout"
+        ):
             await cm.shift(10)
 
 
@@ -315,8 +317,10 @@ async def test_shift_at_expired():
     async with timeout_at(t0 + 0.001) as cm:
         with pytest.raises(asyncio.CancelledError):
             await asyncio.sleep(10)
-        with pytest.raises(RuntimeError,
-                           match="cannot reschedule expired timeout"):
+        with pytest.raises(
+            RuntimeError,
+            match="cannot reschedule expired timeout"
+        ):
             await cm.shift_at(t0 + 10)
 
 
@@ -324,6 +328,8 @@ async def test_shift_at_expired():
 async def test_shift_after_cm_exit():
     async with timeout(1) as cm:
         await asyncio.sleep(0)
-    with pytest.raises(RuntimeError,
-                       match=""):
+    with pytest.raises(
+        RuntimeError,
+        match="cannot reschedule after exit from context manager"
+    ):
         cm.shift(1)

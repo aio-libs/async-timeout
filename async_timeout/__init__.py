@@ -169,7 +169,11 @@ class Timeout:
         now = self._loop.time()
         if deadline <= now:
             self._timeout_handler = None
-            raise asyncio.TimeoutError
+            if self._state == _State.INIT:
+                raise asyncio.TimeoutError
+            else:
+                # state is ENTER
+                raise asyncio.CancelledError
         self._timeout_handler = self._loop.call_at(
             deadline,
             self._on_timeout,
