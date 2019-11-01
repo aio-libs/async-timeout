@@ -106,8 +106,9 @@ class Timeout:
     async def __aexit__(self,
                         exc_type: Type[BaseException],
                         exc_val: BaseException,
-                        exc_tb: TracebackType) -> None:
+                        exc_tb: TracebackType) -> Optional[bool]:
         self._do_exit(exc_type)
+        return None
 
     @property
     def expired(self) -> bool:
