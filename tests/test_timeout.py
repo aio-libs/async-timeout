@@ -261,3 +261,25 @@ async def test_async_no_timeout():
     async with timeout(1) as cm:
         await asyncio.sleep(0)
     assert not cm.expired
+
+
+@pytest.mark.asyncio
+async def test_shift_at():
+    loop = asyncio.get_event_loop()
+    t0 = loop.time()
+    async with timeout(1) as cm:
+        t1 = loop.time()
+        assert t0 + 1 <= cm.deadline <= t1 + 1
+        cm.shift_at(t1+1)
+        assert t1 + 1 <= cm.deadline <= t1 + 1.001
+
+
+@pytest.mark.asyncio
+async def test_shift():
+    loop = asyncio.get_event_loop()
+    t0 = loop.time()
+    async with timeout(1) as cm:
+        t1 = loop.time()
+        assert t0 + 1 <= cm.deadline <= t1 + 1
+        cm.shift(1)
+        assert t1 + 1 <= cm.deadline <= t1 + 1.001
