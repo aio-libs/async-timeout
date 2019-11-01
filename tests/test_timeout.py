@@ -53,9 +53,14 @@ async def test_timeout_disable():
 
 
 @pytest.mark.asyncio
-async def test_timeout_is_none_no_task():
+async def test_timeout_is_none_no_schedule():
     with timeout(None) as cm:
         assert cm._timeout_handler is None
+
+
+def test_timeout_no_loop():
+    with pytest.raises(RuntimeError):
+        timeout(None)
 
 
 @pytest.mark.asyncio
