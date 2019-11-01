@@ -75,9 +75,6 @@ class Timeout:
         self._expired = False
 
         task = _current_task(self._loop)
-        if task is None:
-            raise RuntimeError('Timeout context manager should be used '
-                               'inside a task')
         self._task = task
 
         if self._deadline is None:
