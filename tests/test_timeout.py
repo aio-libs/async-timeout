@@ -228,6 +228,19 @@ async def test_expired_after_rejecting():
 
 
 @pytest.mark.asyncio
+async def test_reject_finished():
+    async with timeout(10) as t:
+        await asyncio.sleep(0)
+
+    assert not t.expired
+    with pytest.raises(
+        RuntimeError,
+        match="invalid state EXIT"
+    ):
+        t.reject()
+
+
+@pytest.mark.asyncio
 async def test_expired_after_timeout():
     with pytest.raises(asyncio.TimeoutError):
         async with timeout(0.01) as t:
