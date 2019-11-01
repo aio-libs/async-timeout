@@ -117,14 +117,6 @@ class Timeout:
     def deadline(self) -> Optional[float]:
         return self._deadline
 
-    def _do_exit(self, exc_type: Type[BaseException]) -> None:
-        if exc_type is asyncio.CancelledError and self._expired:
-            self._timeout_handler = None
-            raise asyncio.TimeoutError
-        # timeout is not expired
-        self.reject()
-        return None
-
     def reject(self) -> None:
         """Reject scheduled timeout if any."""
         # cancel is maybe better name but
@@ -132,6 +124,14 @@ class Timeout:
         if self._timeout_handler is not None:
             self._timeout_handler.cancel()
             self._timeout_handler = None
+
+    def _do_exit(self, exc_type: Type[BaseException]) -> None:
+        if exc_type is asyncio.CancelledError and self._expired:
+            self._timeout_handler = None
+            raise asyncio.TimeoutError
+        # timeout is not expired
+        self.reject()
+        return None
 
     def _on_timeout(self, task: 'asyncio.Task[None]') -> None:
         task.cancel()
