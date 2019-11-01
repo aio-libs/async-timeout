@@ -318,3 +318,12 @@ async def test_shift_at_expired():
         with pytest.raises(RuntimeError,
                            match="cannot reschedule expired timeout"):
             await cm.shift_at(t0 + 10)
+
+
+@pytest.mark.asyncio
+async def test_shift_after_cm_exit():
+    async with timeout(1) as cm:
+        await asyncio.sleep(0)
+    with pytest.raises(RuntimeError,
+                       match=""):
+        cm.shift(1)

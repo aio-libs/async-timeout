@@ -71,7 +71,8 @@ class Timeout:
     # The purpose is to time out as sson as possible
     # without waiting for the next await expression.
 
-    __slots__ = ('_deadline', '_loop', '_expired', '_task', '_timeout_handler')
+    __slots__ = ('_deadline', '_loop', '_expired', '_exited',
+                 '_task', '_timeout_handler')
 
     def __init__(
             self,
@@ -80,6 +81,7 @@ class Timeout:
     ) -> None:
         self._loop = loop
         self._expired = False
+        self._exited = False
 
         task = _current_task(self._loop)
         self._task = task
@@ -142,6 +144,9 @@ class Timeout:
         If new deadline is in the past
         the timeout is raised immediatelly.
         """
+        if self._exited:
+            raise RuntimeError("cannot reschedule "
+                               "after exit from context manager")
         if self._expired:
             raise RuntimeError("cannot reschedule expired timeout")
         if self._timeout_handler is not None:
@@ -158,6 +163,7 @@ class Timeout:
         )
 
     def _do_exit(self, exc_type: Type[BaseException]) -> None:
+        self._exited = True
         if exc_type is asyncio.CancelledError and self._expired:
             self._timeout_handler = None
             raise asyncio.TimeoutError
