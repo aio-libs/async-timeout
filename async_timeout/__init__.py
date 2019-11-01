@@ -25,7 +25,7 @@ def timeout(delay: Optional[float]) -> 'Timeout':
 
     delay - value in seconds or None to disable timeout logic
     """
-    loop = _get_running_loop()
+    loop = _get_running_loop("timeout")
     if delay is not None:
         when = loop.time() + delay  # type: Optional[float]
     else:
@@ -42,7 +42,7 @@ def timeout_at(when: Optional[float]) -> 'Timeout':
     Please note: it is not POSIX time but a time with
     undefined starting base, e.g. the time of the system power on.
     """
-    loop = _get_running_loop()
+    loop = _get_running_loop("timeout_at")
     return Timeout(when, loop)
 
 
@@ -60,6 +60,8 @@ class Timeout:
     #
     # This design allows to avoid many silly misusages.
 
+    __slots__ = ('_deadline', '_loop', '_expired', '_task', '_timeout_handler')
+
     def __init__(
             self,
             when: Optional[float],
@@ -72,17 +74,15 @@ class Timeout:
         self._loop = loop
         self._expired = False
 
-        # Support Tornado<5.0 without timeout
-        # Details: https://github.com/python/asyncio/issues/392
+        task = _current_task(self._loop)
+        if task is None:
+            raise RuntimeError('Timeout context manager should be used '
+                               'inside a task')
+        self._task = task
 
         if self._deadline is None:
             self._timeout_handler = None  # type: Optional[asyncio.Handle]
         else:
-            task = _current_task(self._loop)
-            if task is None:
-                raise RuntimeError('Timeout context manager should be used '
-                                   'inside a task')
-
             self._timeout_handler = self._loop.call_at(
                 self._deadline, self._on_timeout, task)
 
@@ -142,5 +142,10 @@ def _current_task(loop: asyncio.AbstractEventLoop) -> 'asyncio.Task[Any]':
         return asyncio.Task.current_task(loop=loop)
 
 
-def _get_running_loop() -> asyncio.AbstractEventLoop:
-    return asyncio.get_event_loop()
+def _get_running_loop(name: str) -> asyncio.AbstractEventLoop:
+    loop = asyncio.get_event_loop()
+    if not loop.is_running():
+        raise RuntimeError(
+            "{}() should be called with running event loop".format(name)
+        )
+    return loop

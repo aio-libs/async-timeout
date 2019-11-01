@@ -52,7 +52,8 @@ async def test_timeout_disable():
     assert 0.09 < dt < 0.13, dt
 
 
-def test_timeout_is_none_no_task():
+@pytest.mark.asyncio
+async def test_timeout_is_none_no_task():
     with timeout(None) as cm:
         assert cm._timeout_handler is None
 
