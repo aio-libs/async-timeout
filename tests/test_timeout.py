@@ -65,29 +65,9 @@ def test_timeout_no_loop():
 
 
 @pytest.mark.asyncio
-async def test_timeout_enable_zero():
+async def test_timeout_zero():
     with pytest.raises(asyncio.TimeoutError):
-        with timeout(0) as cm:
-            await asyncio.sleep(0.1)
-
-    assert cm.expired
-
-
-@pytest.mark.asyncio
-async def test_timeout_enable_zero_coro_not_started():
-    coro_started = False
-
-    async def coro():
-        nonlocal coro_started
-        coro_started = True
-
-    with pytest.raises(asyncio.TimeoutError):
-        with timeout(0) as cm:
-            await asyncio.sleep(0.01)
-            await coro()
-
-    assert cm.expired
-    assert coro_started is False
+        timeout(0)
 
 
 @pytest.mark.asyncio
@@ -253,7 +233,7 @@ async def test_expired_after_rejecting():
 @pytest.mark.asyncio
 async def test_expired_after_timeout():
     with pytest.raises(asyncio.TimeoutError):
-        async with timeout(0) as t:
+        async with timeout(0.01) as t:
             assert not t.expired
             await asyncio.sleep(10)
     assert t.expired
@@ -266,3 +246,18 @@ async def test_deadline():
     async with timeout(1) as cm:
         t1 = loop.time()
         assert t0 + 1 <= cm.deadline <= t1 + 1
+
+
+@pytest.mark.asyncio
+async def test_async_timeout():
+    with pytest.raises(asyncio.TimeoutError):
+        async with timeout(0.01) as cm:
+            await asyncio.sleep(10)
+    assert cm.expired
+
+
+@pytest.mark.asyncio
+async def test_async_no_timeout():
+    async with timeout(1) as cm:
+        await asyncio.sleep(0)
+    assert not cm.expired

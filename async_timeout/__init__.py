@@ -27,16 +27,16 @@ def timeout(delay: Optional[float]) -> 'Timeout':
     """
     loop = _get_running_loop("timeout")
     if delay is not None:
-        when = loop.time() + delay  # type: Optional[float]
+        deadline = loop.time() + delay  # type: Optional[float]
     else:
-        when = None
-    return Timeout(when, loop)
+        deadline = None
+    return Timeout(deadline, loop)
 
 
-def timeout_at(when: Optional[float]) -> 'Timeout':
+def timeout_at(deadline: Optional[float]) -> 'Timeout':
     """Schedule the timeout at absolute time.
 
-    when arguments points on the time in the same clock system
+    deadline arguments points on the time in the same clock system
     as loop.time().
 
     Please note: it is not POSIX time but a time with
@@ -49,7 +49,7 @@ def timeout_at(when: Optional[float]) -> 'Timeout':
 
     """
     loop = _get_running_loop("timeout_at")
-    return Timeout(when, loop)
+    return Timeout(deadline, loop)
 
 
 @final
@@ -65,29 +65,30 @@ class Timeout:
     # the context manager should be used from async function context.
     #
     # This design allows to avoid many silly misusages.
+    #
+    # TimeoutError is raised immadiatelly when scheduled
+    # if the deadline is passed.
+    # The purpose is to time out as sson as possible
+    # without waiting for the next await expression.
 
     __slots__ = ('_deadline', '_loop', '_expired', '_task', '_timeout_handler')
 
     def __init__(
             self,
-            when: Optional[float],
+            deadline: Optional[float],
             loop: asyncio.AbstractEventLoop
     ) -> None:
-        now = loop.time()
-        if when is not None:
-            when = max(when, now)
-        self._deadline = when
         self._loop = loop
         self._expired = False
 
         task = _current_task(self._loop)
         self._task = task
 
-        if self._deadline is None:
-            self._timeout_handler = None  # type: Optional[asyncio.Handle]
+        self._timeout_handler = None  # type: Optional[asyncio.Handle]
+        if deadline is None:
+            self._deadline = None  # type: Optional[float]
         else:
-            self._timeout_handler = self._loop.call_at(
-                self._deadline, self._on_timeout, task)
+            self.shift_at(deadline)
 
     def __enter__(self) -> 'Timeout':
         return self
@@ -124,6 +125,24 @@ class Timeout:
         if self._timeout_handler is not None:
             self._timeout_handler.cancel()
             self._timeout_handler = None
+
+    def shift(self, delay: float) -> None:
+        now = self._loop.time()
+        self.shift_at(now + delay)
+
+    def shift_at(self, deadline: float) -> None:
+        if self._timeout_handler is not None:
+            self._timeout_handler.cancel()
+        self._deadline = deadline
+        now = self._loop.time()
+        if deadline <= now:
+            self._timeout_handler = None
+            raise asyncio.TimeoutError
+        self._timeout_handler = self._loop.call_at(
+            deadline,
+            self._on_timeout,
+            self._task
+        )
 
     def _do_exit(self, exc_type: Type[BaseException]) -> None:
         if exc_type is asyncio.CancelledError and self._expired:
