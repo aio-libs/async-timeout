@@ -25,7 +25,7 @@ def timeout(delay: Optional[float]) -> 'Timeout':
 
     delay - value in seconds or None to disable timeout logic
     """
-    loop = _get_running_loop("timeout")
+    loop = _get_running_loop()
     if delay is not None:
         deadline = loop.time() + delay  # type: Optional[float]
     else:
@@ -48,7 +48,7 @@ def timeout_at(deadline: Optional[float]) -> 'Timeout':
 
 
     """
-    loop = _get_running_loop("timeout_at")
+    loop = _get_running_loop()
     return Timeout(deadline, loop)
 
 
@@ -164,10 +164,11 @@ def _current_task(loop: asyncio.AbstractEventLoop) -> 'asyncio.Task[Any]':
         return asyncio.Task.current_task(loop=loop)
 
 
-def _get_running_loop(name: str) -> asyncio.AbstractEventLoop:
-    loop = asyncio.get_event_loop()
-    if not loop.is_running():
-        raise RuntimeError(
-            "{}() should be called with running event loop".format(name)
-        )
-    return loop
+def _get_running_loop() -> asyncio.AbstractEventLoop:
+    if sys.version_info >= (3, 7):
+        return asyncio.get_running_loop()
+    else:
+        loop = asyncio.get_event_loop()
+        if not loop.is_running():
+            raise RuntimeError("no running event loop")
+        return loop
