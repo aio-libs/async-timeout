@@ -68,11 +68,9 @@ class Timeout:
         now = loop.time()
         if when is not None:
             when = max(when, now)
-        self._started_at = now
         self._deadline = when
         self._loop = loop
         self._expired = False
-        self._finished_at = None  # type: Optional[float]
 
         # Support Tornado<5.0 without timeout
         # Details: https://github.com/python/asyncio/issues/392
@@ -113,19 +111,10 @@ class Timeout:
         return self._expired
 
     @property
-    def started_at(self) -> float:
-        return self._started_at
-
-    @property
-    def finished_at(self) -> Optional[float]:
-        return self._finished_at
-
-    @property
     def deadline(self) -> Optional[float]:
         return self._deadline
 
     def _do_exit(self, exc_type: Type[BaseException]) -> None:
-        self._finished_at = self._loop.time()
         if exc_type is asyncio.CancelledError and self._expired:
             self._timeout_handler = None
             raise asyncio.TimeoutError
