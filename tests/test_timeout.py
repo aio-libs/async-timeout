@@ -346,3 +346,16 @@ async def test_shift_after_cm_exit():
         match="cannot reschedule after exit from context manager"
     ):
         cm.shift(1)
+
+
+@pytest.mark.asyncio
+async def test_enter_twice():
+    async with timeout(10) as t:
+        await asyncio.sleep(0)
+
+    with pytest.raises(
+        RuntimeError,
+        match="invalid state EXIT"
+    ):
+        async with t:
+            await asyncio.sleep(0)
