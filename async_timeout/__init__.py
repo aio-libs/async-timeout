@@ -137,6 +137,11 @@ class Timeout:
         self.shift_at(self._deadline + delay)
 
     def shift_at(self, deadline: float) -> None:
+        """Advance timeout on the abdelay seconds.
+
+        If new deadline is in the past
+        the timeout is raised immediatelly.
+        """
         if self._expired:
             raise RuntimeError("cannot reschedule expired timeout")
         if self._timeout_handler is not None:
