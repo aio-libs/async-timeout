@@ -60,7 +60,8 @@ async def test_timeout_is_none_no_schedule():
 
 
 def test_timeout_no_loop():
-    with pytest.raises(RuntimeError):
+    with pytest.raises(RuntimeError,
+                       match="no running event loop"):
         timeout(None)
 
 
@@ -127,12 +128,6 @@ async def test_timeout_time():
     assert not foo_running
 
 
-def test_raise_runtimeerror_if_no_task():
-    with pytest.raises(RuntimeError):
-        with timeout(0.1):
-            pass
-
-
 @pytest.mark.asyncio
 async def test_outer_coro_is_not_cancelled():
 
@@ -197,9 +192,11 @@ async def test_timeout_inner_timeout_error():
 
 @pytest.mark.asyncio
 async def test_timeout_inner_other_error():
-    with pytest.raises(RuntimeError):
+    class MyError(RuntimeError):
+        pass
+    with pytest.raises(MyError):
         with timeout(0.01) as cm:
-            raise RuntimeError
+            raise MyError
     assert not cm.expired
 
 
@@ -288,7 +285,8 @@ async def test_shift():
 @pytest.mark.asyncio
 async def test_shift_none_deadline():
     async with timeout(None) as cm:
-        with pytest.raises(RuntimeError):
+        with pytest.raises(RuntimeError,
+                           match="shifting timeout without deadline"):
             cm.shift(1)
 
 
@@ -297,3 +295,26 @@ async def test_shift_negative_expired():
     async with timeout(1) as cm:
         with pytest.raises(asyncio.TimeoutError):
             cm.shift(-1)
+
+
+
+@pytest.mark.asyncio
+async def test_shift_expired():
+    async with timeout(0.001) as cm:
+        with pytest.raises(asyncio.CancelledError):
+            await asyncio.sleep(10)
+        with pytest.raises(RuntimeError,
+                           match="cannot reschedule expired timeout"):
+            await cm.shift(10)
+
+
+@pytest.mark.asyncio
+async def test_shift_at_expired():
+    loop = asyncio.get_event_loop()
+    t0 = loop.time()
+    async with timeout_at(t0 + 0.001) as cm:
+        with pytest.raises(asyncio.CancelledError):
+            await asyncio.sleep(10)
+        with pytest.raises(RuntimeError,
+                           match="cannot reschedule expired timeout"):
+            await cm.shift_at(t0 + 10)

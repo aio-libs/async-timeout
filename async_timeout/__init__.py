@@ -137,6 +137,8 @@ class Timeout:
         self.shift_at(self._deadline + delay)
 
     def shift_at(self, deadline: float) -> None:
+        if self._expired:
+            raise RuntimeError("cannot reschedule expired timeout")
         if self._timeout_handler is not None:
             self._timeout_handler.cancel()
         self._deadline = deadline
