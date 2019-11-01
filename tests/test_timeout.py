@@ -290,3 +290,10 @@ async def test_shift_none_deadline():
     async with timeout(None) as cm:
         with pytest.raises(RuntimeError):
             cm.shift(1)
+
+
+@pytest.mark.asyncio
+async def test_shift_negative_expired():
+    async with timeout(1) as cm:
+        with pytest.raises(asyncio.TimeoutError):
+            cm.shift(-1)
