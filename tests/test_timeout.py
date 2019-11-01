@@ -56,6 +56,7 @@ async def test_timeout_disable():
 async def test_timeout_is_none_no_schedule():
     with timeout(None) as cm:
         assert cm._timeout_handler is None
+        assert cm.deadline is None
 
 
 def test_timeout_no_loop():
@@ -256,3 +257,12 @@ async def test_expired_after_timeout():
             assert not t.expired
             await asyncio.sleep(10)
     assert t.expired
+
+
+@pytest.mark.asyncio
+async def test_deadline():
+    loop = asyncio.get_event_loop()
+    t0 = loop.time()
+    async with timeout(1) as cm:
+        t1 = loop.time()
+        assert t0 + 1 <= cm.deadline <= t1 + 1
