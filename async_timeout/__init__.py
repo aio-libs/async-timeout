@@ -160,7 +160,7 @@ class Timeout:
         the timeout is raised immediatelly.
         """
         if self._state == _State.EXIT:
-            raise RuntimeError("cannot reschedule " "after exit from context manager")
+            raise RuntimeError("cannot reschedule after exit from context manager")
         if self._state == _State.TIMEOUT:
             raise RuntimeError("cannot reschedule expired timeout")
         if self._timeout_handler is not None:
