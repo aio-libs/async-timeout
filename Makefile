@@ -14,6 +14,7 @@ mypy:
 black:
 	isort -c -rc $(SOURCES)
 	black --check $(SOURCES)
+	flake8 $(SOURCES)
 
 
 fmt:
