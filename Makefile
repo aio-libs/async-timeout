@@ -4,7 +4,7 @@ test: lint
 	pytest tests
 
 
-lint: mypy check black
+lint: mypy check black flake8
 
 
 mypy:
@@ -13,7 +13,11 @@ mypy:
 
 black:
 	isort -c -rc $(SOURCES)
-	black --check $(SOURCES)
+	if python -c "import sys; sys.exit(sys.version_info < (3, 6))"; then \
+	    black --check $(SOURCES); \
+	fi
+
+flake8:
 	flake8 $(SOURCES)
 
 
