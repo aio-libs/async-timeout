@@ -1,19 +1,19 @@
 import asyncio
 import enum
 import sys
-
 from types import TracebackType
 from typing import Any, Optional, Type
+
 from typing_extensions import final
 
 
-__version__ = '4.0.0a0'
+__version__ = "4.0.0a0"
 
 
-__all__ = ('timeout', 'timeout_at')
+__all__ = ("timeout", "timeout_at")
 
 
-def timeout(delay: Optional[float]) -> 'Timeout':
+def timeout(delay: Optional[float]) -> "Timeout":
     """timeout context manager.
 
     Useful in cases when you want to apply timeout logic around block
@@ -34,7 +34,7 @@ def timeout(delay: Optional[float]) -> 'Timeout':
     return Timeout(deadline, loop)
 
 
-def timeout_at(deadline: Optional[float]) -> 'Timeout':
+def timeout_at(deadline: Optional[float]) -> "Timeout":
     """Schedule the timeout at absolute time.
 
     deadline arguments points on the time in the same clock system
@@ -79,13 +79,10 @@ class Timeout:
     # The purpose is to time out as sson as possible
     # without waiting for the next await expression.
 
-    __slots__ = ('_deadline', '_loop', '_state',
-                 '_task', '_timeout_handler')
+    __slots__ = ("_deadline", "_loop", "_state", "_task", "_timeout_handler")
 
     def __init__(
-            self,
-            deadline: Optional[float],
-            loop: asyncio.AbstractEventLoop
+        self, deadline: Optional[float], loop: asyncio.AbstractEventLoop
     ) -> None:
         self._loop = loop
         self._state = _State.INIT
@@ -99,25 +96,29 @@ class Timeout:
         else:
             self.shift_at(deadline)
 
-    def __enter__(self) -> 'Timeout':
+    def __enter__(self) -> "Timeout":
         self._do_enter()
         return self
 
-    def __exit__(self,
-                 exc_type: Type[BaseException],
-                 exc_val: BaseException,
-                 exc_tb: TracebackType) -> Optional[bool]:
+    def __exit__(
+        self,
+        exc_type: Type[BaseException],
+        exc_val: BaseException,
+        exc_tb: TracebackType,
+    ) -> Optional[bool]:
         self._do_exit(exc_type)
         return None
 
-    async def __aenter__(self) -> 'Timeout':
+    async def __aenter__(self) -> "Timeout":
         self._do_enter()
         return self
 
-    async def __aexit__(self,
-                        exc_type: Type[BaseException],
-                        exc_val: BaseException,
-                        exc_tb: TracebackType) -> Optional[bool]:
+    async def __aexit__(
+        self,
+        exc_type: Type[BaseException],
+        exc_val: BaseException,
+        exc_tb: TracebackType,
+    ) -> Optional[bool]:
         self._do_exit(exc_type)
         return None
 
@@ -159,8 +160,7 @@ class Timeout:
         the timeout is raised immediatelly.
         """
         if self._state == _State.EXIT:
-            raise RuntimeError("cannot reschedule "
-                               "after exit from context manager")
+            raise RuntimeError("cannot reschedule " "after exit from context manager")
         if self._state == _State.TIMEOUT:
             raise RuntimeError("cannot reschedule expired timeout")
         if self._timeout_handler is not None:
@@ -175,9 +175,7 @@ class Timeout:
                 # state is ENTER
                 raise asyncio.CancelledError
         self._timeout_handler = self._loop.call_at(
-            deadline,
-            self._on_timeout,
-            self._task
+            deadline, self._on_timeout, self._task
         )
 
     def _do_enter(self) -> None:
@@ -186,10 +184,7 @@ class Timeout:
         self._state = _State.ENTER
 
     def _do_exit(self, exc_type: Type[BaseException]) -> None:
-        if (
-            exc_type is asyncio.CancelledError and
-            self._state == _State.TIMEOUT
-        ):
+        if exc_type is asyncio.CancelledError and self._state == _State.TIMEOUT:
             self._timeout_handler = None
             raise asyncio.TimeoutError
         # timeout is not expired
@@ -197,12 +192,12 @@ class Timeout:
         self._reject()
         return None
 
-    def _on_timeout(self, task: 'asyncio.Task[None]') -> None:
+    def _on_timeout(self, task: "asyncio.Task[None]") -> None:
         task.cancel()
         self._state = _State.TIMEOUT
 
 
-def _current_task(loop: asyncio.AbstractEventLoop) -> 'asyncio.Task[Any]':
+def _current_task(loop: asyncio.AbstractEventLoop) -> "asyncio.Task[Any]":
     if sys.version_info >= (3, 7):
         return asyncio.current_task(loop=loop)
     else:

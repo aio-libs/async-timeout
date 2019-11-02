@@ -23,31 +23,31 @@ async def test_timeout():
         with timeout(0.01) as t:
             await long_running_task()
             assert t._loop is asyncio.get_event_loop()
-    assert canceled_raised, 'CancelledError was not raised'
+    assert canceled_raised, "CancelledError was not raised"
 
 
 @pytest.mark.asyncio
 async def test_timeout_finish_in_time():
     async def long_running_task():
         await asyncio.sleep(0.01)
-        return 'done'
+        return "done"
 
     with timeout(0.1):
         resp = await long_running_task()
-    assert resp == 'done'
+    assert resp == "done"
 
 
 @pytest.mark.asyncio
 async def test_timeout_disable():
     async def long_running_task():
         await asyncio.sleep(0.1)
-        return 'done'
+        return "done"
 
     loop = asyncio.get_event_loop()
     t0 = loop.time()
     with timeout(None):
         resp = await long_running_task()
-    assert resp == 'done'
+    assert resp == "done"
     dt = loop.time() - t0
     assert 0.09 < dt < 0.13, dt
 
@@ -60,8 +60,7 @@ async def test_timeout_is_none_no_schedule():
 
 
 def test_timeout_no_loop():
-    with pytest.raises(RuntimeError,
-                       match="no running event loop"):
+    with pytest.raises(RuntimeError, match="no running event loop"):
         timeout(None)
 
 
@@ -91,21 +90,21 @@ async def test_timeout_canceled_error_is_not_converted_to_timeout():
 async def test_timeout_blocking_loop():
     async def long_running_task():
         time.sleep(0.1)
-        return 'done'
+        return "done"
 
     with timeout(0.01):
         result = await long_running_task()
-    assert result == 'done'
+    assert result == "done"
 
 
 @pytest.mark.asyncio
 async def test_for_race_conditions():
     loop = asyncio.get_event_loop()
     fut = loop.create_future()
-    loop.call_later(0.1, fut.set_result('done'))
+    loop.call_later(0.1, fut.set_result("done"))
     with timeout(0.2):
         resp = await fut
-    assert resp == 'done'
+    assert resp == "done"
 
 
 @pytest.mark.asyncio
@@ -122,8 +121,8 @@ async def test_timeout_time():
                 foo_running = False
 
     dt = loop.time() - start
-    if not (0.09 < dt < 0.11) and os.environ.get('APPVEYOR'):
-        pytest.xfail('appveyor sometimes is toooo sloooow')
+    if not (0.09 < dt < 0.11) and os.environ.get("APPVEYOR"):
+        pytest.xfail("appveyor sometimes is toooo sloooow")
     assert 0.09 < dt < 0.11
     assert not foo_running
 
@@ -194,6 +193,7 @@ async def test_timeout_inner_timeout_error():
 async def test_timeout_inner_other_error():
     class MyError(RuntimeError):
         pass
+
     with pytest.raises(MyError):
         with timeout(0.01) as cm:
             raise MyError
@@ -233,10 +233,7 @@ async def test_reject_finished():
         await asyncio.sleep(0)
 
     assert not t.expired
-    with pytest.raises(
-        RuntimeError,
-        match="invalid state EXIT"
-    ):
+    with pytest.raises(RuntimeError, match="invalid state EXIT"):
         t.reject()
 
 
@@ -280,7 +277,7 @@ async def test_shift_at():
     async with timeout(1) as cm:
         t1 = loop.time()
         assert t0 + 1 <= cm.deadline <= t1 + 1
-        cm.shift_at(t1+1)
+        cm.shift_at(t1 + 1)
         assert t1 + 1 <= cm.deadline <= t1 + 1.001
 
 
@@ -298,8 +295,7 @@ async def test_shift():
 @pytest.mark.asyncio
 async def test_shift_none_deadline():
     async with timeout(None) as cm:
-        with pytest.raises(RuntimeError,
-                           match="shifting timeout without deadline"):
+        with pytest.raises(RuntimeError, match="shifting timeout without deadline"):
             cm.shift(1)
 
 
@@ -310,16 +306,12 @@ async def test_shift_negative_expired():
             cm.shift(-1)
 
 
-
 @pytest.mark.asyncio
 async def test_shift_expired():
     async with timeout(0.001) as cm:
         with pytest.raises(asyncio.CancelledError):
             await asyncio.sleep(10)
-        with pytest.raises(
-            RuntimeError,
-            match="cannot reschedule expired timeout"
-        ):
+        with pytest.raises(RuntimeError, match="cannot reschedule expired timeout"):
             await cm.shift(10)
 
 
@@ -330,10 +322,7 @@ async def test_shift_at_expired():
     async with timeout_at(t0 + 0.001) as cm:
         with pytest.raises(asyncio.CancelledError):
             await asyncio.sleep(10)
-        with pytest.raises(
-            RuntimeError,
-            match="cannot reschedule expired timeout"
-        ):
+        with pytest.raises(RuntimeError, match="cannot reschedule expired timeout"):
             await cm.shift_at(t0 + 10)
 
 
@@ -342,8 +331,7 @@ async def test_shift_after_cm_exit():
     async with timeout(1) as cm:
         await asyncio.sleep(0)
     with pytest.raises(
-        RuntimeError,
-        match="cannot reschedule after exit from context manager"
+        RuntimeError, match="cannot reschedule after exit from context manager"
     ):
         cm.shift(1)
 
@@ -353,9 +341,6 @@ async def test_enter_twice():
     async with timeout(10) as t:
         await asyncio.sleep(0)
 
-    with pytest.raises(
-        RuntimeError,
-        match="invalid state EXIT"
-    ):
+    with pytest.raises(RuntimeError, match="invalid state EXIT"):
         async with t:
             await asyncio.sleep(0)
