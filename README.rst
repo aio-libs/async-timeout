@@ -37,13 +37,13 @@ that cancels a block on *timeout* expiring::
 *timeout* parameter could be ``None`` for skipping timeout functionality.
 
 
-Alternatively, ``timeout.at(when)`` can be used for scheduling
+Alternatively, ``timeout_at(when)`` can be used for scheduling
 at the absolute time::
 
    loop = asyncio.get_event_loop()
    now = loop.time()
 
-   async with timeout.at(now + 1.5):
+   async with timeout_at(now + 1.5):
        await inner()
 
 
@@ -64,18 +64,21 @@ timeout context manager.
 If ``inner()`` call explicitly raises ``TimeoutError`` ``cm.expired``
 is ``False``.
 
-
-The ``.remaining`` and ``.elapsed`` properties can be used
-for narrowing timeout of the inner code and logging::
+The scheduled deadline time is available as ``.deadline`` property::
 
    async with timeout(1.5) as cm:
-       await inner()
-       await another(timeout=cm.remaining)
-   print(cm.elapsed)
+       cm.deadline
 
-Both properties are only updated while context manager is active.
+Not finished yet timeout can be rescheduled by ``shift()``
+or ``shift_at()`` methods::
 
-Note that ``.elapsed + .remaining`` is not accurate and can exceed the timeout.
+   async with timeout(1.5) as cm:
+       cm.shift(1)  # add another second on waiting
+       cm.shift_at(loop.time() + 5)  # reschedule to now+5 seconds
+
+Rescheduling is forbidden if the timeout is expired or after exit from ``async with``
+code block.
+
 
 Installation
 ------------
