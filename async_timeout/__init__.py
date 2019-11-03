@@ -1,6 +1,7 @@
 import asyncio
 import enum
 import sys
+import warnings
 from types import TracebackType
 from typing import Any, Optional, Type
 
@@ -97,6 +98,11 @@ class Timeout:
             self.shift_at(deadline)
 
     def __enter__(self) -> "Timeout":
+        warnings.warn(
+            "with timeout() is deprecated, use async with timeout() instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self._do_enter()
         return self
 

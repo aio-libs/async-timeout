@@ -20,7 +20,7 @@ async def test_timeout():
             raise
 
     with pytest.raises(asyncio.TimeoutError):
-        with timeout(0.01) as t:
+        async with timeout(0.01) as t:
             await long_running_task()
             assert t._loop is asyncio.get_event_loop()
     assert canceled_raised, "CancelledError was not raised"
@@ -32,7 +32,7 @@ async def test_timeout_finish_in_time():
         await asyncio.sleep(0.01)
         return "done"
 
-    with timeout(0.1):
+    async with timeout(0.1):
         resp = await long_running_task()
     assert resp == "done"
 
@@ -45,7 +45,7 @@ async def test_timeout_disable():
 
     loop = asyncio.get_event_loop()
     t0 = loop.time()
-    with timeout(None):
+    async with timeout(None):
         resp = await long_running_task()
     assert resp == "done"
     dt = loop.time() - t0
@@ -54,7 +54,7 @@ async def test_timeout_disable():
 
 @pytest.mark.asyncio
 async def test_timeout_is_none_no_schedule():
-    with timeout(None) as cm:
+    async with timeout(None) as cm:
         assert cm._timeout_handler is None
         assert cm.deadline is None
 
@@ -74,7 +74,7 @@ async def test_timeout_zero():
 async def test_timeout_not_relevant_exception():
     await asyncio.sleep(0)
     with pytest.raises(KeyError):
-        with timeout(0.1):
+        async with timeout(0.1):
             raise KeyError
 
 
@@ -82,7 +82,7 @@ async def test_timeout_not_relevant_exception():
 async def test_timeout_canceled_error_is_not_converted_to_timeout():
     await asyncio.sleep(0)
     with pytest.raises(asyncio.CancelledError):
-        with timeout(0.001):
+        async with timeout(0.001):
             raise asyncio.CancelledError
 
 
@@ -92,7 +92,7 @@ async def test_timeout_blocking_loop():
         time.sleep(0.1)
         return "done"
 
-    with timeout(0.01):
+    async with timeout(0.01):
         result = await long_running_task()
     assert result == "done"
 
@@ -102,7 +102,7 @@ async def test_for_race_conditions():
     loop = asyncio.get_event_loop()
     fut = loop.create_future()
     loop.call_later(0.1, fut.set_result("done"))
-    with timeout(0.2):
+    async with timeout(0.2):
         resp = await fut
     assert resp == "done"
 
@@ -113,7 +113,7 @@ async def test_timeout_time():
     loop = asyncio.get_event_loop()
     start = loop.time()
     with pytest.raises(asyncio.TimeoutError):
-        with timeout(0.1):
+        async with timeout(0.1):
             foo_running = True
             try:
                 await asyncio.sleep(0.2)
@@ -135,7 +135,7 @@ async def test_outer_coro_is_not_cancelled():
     async def outer():
         nonlocal has_timeout
         try:
-            with timeout(0.001):
+            async with timeout(0.001):
                 await asyncio.sleep(1)
         except asyncio.TimeoutError:
             has_timeout = True
@@ -168,7 +168,7 @@ async def test_cancel_outer_coro():
 @pytest.mark.asyncio
 async def test_timeout_suppress_exception_chain():
     with pytest.raises(asyncio.TimeoutError) as ctx:
-        with timeout(0.01):
+        async with timeout(0.01):
             await asyncio.sleep(10)
     assert not ctx.value.__suppress_context__
 
@@ -176,7 +176,7 @@ async def test_timeout_suppress_exception_chain():
 @pytest.mark.asyncio
 async def test_timeout_expired():
     with pytest.raises(asyncio.TimeoutError):
-        with timeout(0.01) as cm:
+        async with timeout(0.01) as cm:
             await asyncio.sleep(10)
     assert cm.expired
 
@@ -184,7 +184,7 @@ async def test_timeout_expired():
 @pytest.mark.asyncio
 async def test_timeout_inner_timeout_error():
     with pytest.raises(asyncio.TimeoutError):
-        with timeout(0.01) as cm:
+        async with timeout(0.01) as cm:
             raise asyncio.TimeoutError
     assert not cm.expired
 
@@ -195,7 +195,7 @@ async def test_timeout_inner_other_error():
         pass
 
     with pytest.raises(MyError):
-        with timeout(0.01) as cm:
+        async with timeout(0.01) as cm:
             raise MyError
     assert not cm.expired
 
@@ -343,4 +343,11 @@ async def test_enter_twice():
 
     with pytest.raises(RuntimeError, match="invalid state EXIT"):
         async with t:
+            await asyncio.sleep(0)
+
+
+@pytest.mark.asyncio
+async def test_deprecated_with():
+    with pytest.warns(DeprecationWarning):
+        with timeout(1):
             await asyncio.sleep(0)

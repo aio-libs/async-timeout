@@ -1,12 +1,14 @@
 CHANGES
 =======
 
-3.1.0 (2019-10-XX)
+3.1.0 (2019-11-XX)
 ------------------
 
 * Add the elapsed property (#24)
 
 * Implement `timeout.at(when)` (#117)
+
+* Deprecate synchronous context manager usage
 
 3.0.1 (2018-10-09)
 ------------------
