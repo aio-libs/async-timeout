@@ -155,9 +155,8 @@ class Timeout:
 
         The delay can be negative.
         """
-        if self._deadline is None:
-            raise RuntimeError("shifting timeout without deadline")
-        self.shift_at(self._deadline + delay)
+        now = self._loop.time()
+        self.shift_at(now + delay)
 
     def shift_at(self, deadline: float) -> None:
         """Advance timeout on the abdelay seconds.
