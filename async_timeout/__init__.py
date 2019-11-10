@@ -95,7 +95,7 @@ class Timeout:
         if deadline is None:
             self._deadline = None  # type: Optional[float]
         else:
-            self.shift_at(deadline)
+            self.shift_to(deadline)
 
     def __enter__(self) -> "Timeout":
         warnings.warn(
@@ -150,15 +150,15 @@ class Timeout:
             self._timeout_handler.cancel()
             self._timeout_handler = None
 
-    def shift(self, delay: float) -> None:
+    def shift_by(self, delay: float) -> None:
         """Advance timeout on delay seconds.
 
         The delay can be negative.
         """
         now = self._loop.time()
-        self.shift_at(now + delay)
+        self.shift_to(now + delay)
 
-    def shift_at(self, deadline: float) -> None:
+    def shift_to(self, deadline: float) -> None:
         """Advance timeout on the abdelay seconds.
 
         If new deadline is in the past
