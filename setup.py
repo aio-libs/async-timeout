@@ -7,6 +7,7 @@ from setuptools import setup
 here = pathlib.Path(__file__).parent
 fname = here / "async_timeout" / "__init__.py"
 
+
 with fname.open() as fp:
     try:
         version = re.findall(r'^__version__ = "([^"]+)"$', fp.read(), re.M)[0]
@@ -18,6 +19,11 @@ def read(name):
     fname = here / name
     with fname.open() as f:
         return f.read()
+
+
+install_requires = [
+    'typing_extensions>=3.6.5',
+]
 
 
 setup(
@@ -43,5 +49,6 @@ setup(
     license="Apache 2",
     packages=["async_timeout"],
     python_requires=">=3.5.3",
+    install_requires=install_requires,
     include_package_data=True,
 )
