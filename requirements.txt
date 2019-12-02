@@ -4,6 +4,6 @@ pytest==5.3.0
 pytest-asyncio==0.10.0
 pytest-cov==2.8.1
 docutils==0.15.2
-mypy==0.740
+mypy==0.750
 flake8==3.7.9
 -e .
