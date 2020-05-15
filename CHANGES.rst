@@ -1,6 +1,11 @@
 CHANGES
 =======
 
+Unreleased
+----------
+
+* Add posibility to use timeout as function decorator
+
 4.0.0 (2019-11-XX)
 ------------------
 
