@@ -37,6 +37,13 @@ that cancels a block on *timeout* expiring::
 *timeout* parameter could be ``None`` for skipping timeout functionality.
 
 
+`timeout` can be also used as a decorator::
+
+    @timeout(1.5)
+    async def possibly_long_running():
+        pass
+
+
 Alternatively, ``timeout_at(when)`` can be used for scheduling
 at the absolute time::
 
