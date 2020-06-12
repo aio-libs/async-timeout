@@ -11,8 +11,8 @@ fname = here / "async_timeout" / "__init__.py"
 with fname.open() as fp:
     try:
         version = re.findall(r'^__version__ = "([^"]+)"$', fp.read(), re.M)[0]
-    except IndexError:
-        raise RuntimeError("Unable to determine version.")
+    except IndexError as e:
+        raise RuntimeError("Unable to determine version.") from e
 
 
 def read(name):
