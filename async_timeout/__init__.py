@@ -132,6 +132,7 @@ class Timeout:
         async def inner(*args, **kargs):
             with self:
                 return await f(*args, **kargs)
+
         return inner
 
     @property
