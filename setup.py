@@ -22,7 +22,7 @@ def read(name):
 
 
 install_requires = [
-    "typing_extensions>=3.6.5",
+    "typing_extensions>=3.6.5; python_version<"3.7"",
 ]
 
 
