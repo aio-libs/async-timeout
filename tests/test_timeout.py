@@ -275,7 +275,7 @@ async def test_shift_to():
         t1 = loop.time()
         assert t0 + 1 <= cm.deadline <= t1 + 1
         cm.shift_to(t1 + 1)
-        assert t1 + 1 <= cm.deadline <= t1 + 1.001
+        assert t1 + 1 <= cm.deadline <= t1 + 1.1
 
 
 @pytest.mark.asyncio
@@ -286,7 +286,7 @@ async def test_shift_by():
         t1 = loop.time()
         assert t0 + 1 <= cm.deadline <= t1 + 1
         cm.shift_by(1)
-        assert t1 + 0.999 <= cm.deadline <= t1 + 1.001
+        assert t1 + 0.999 <= cm.deadline <= t1 + 1.1
 
 
 @pytest.mark.asyncio
