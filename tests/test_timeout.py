@@ -48,7 +48,7 @@ async def test_timeout_disable():
         resp = await long_running_task()
     assert resp == "done"
     dt = loop.time() - t0
-    assert 0.09 < dt < 0.2, dt
+    assert 0.09 < dt < 0.3, dt
 
 
 @pytest.mark.asyncio
