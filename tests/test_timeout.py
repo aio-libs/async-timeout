@@ -1,5 +1,4 @@
 import asyncio
-import os
 import time
 
 import pytest
@@ -49,7 +48,7 @@ async def test_timeout_disable():
         resp = await long_running_task()
     assert resp == "done"
     dt = loop.time() - t0
-    assert 0.09 < dt < 0.13, dt
+    assert 0.09 < dt < 0.2, dt
 
 
 @pytest.mark.asyncio
@@ -121,9 +120,7 @@ async def test_timeout_time():
                 foo_running = False
 
     dt = loop.time() - start
-    if not (0.09 < dt < 0.11) and os.environ.get("APPVEYOR"):
-        pytest.xfail("appveyor sometimes is toooo sloooow")
-    assert 0.09 < dt < 0.11
+    assert 0.09 < dt < 0.2
     assert not foo_running
 
 
