@@ -27,6 +27,26 @@ async def test_timeout():
 
 
 @pytest.mark.asyncio
+async def test_timeout_as_decorator():
+    canceled_raised = False
+
+    @timeout(0.01)
+    async def long_running_task(arg, *, karg):
+        assert arg == 1
+        assert karg == 2
+        try:
+            await asyncio.sleep(10)
+        except asyncio.CancelledError:
+            nonlocal canceled_raised
+            canceled_raised = True
+            raise
+
+    with pytest.raises(asyncio.TimeoutError):
+        await long_running_task(1, karg=2)
+    assert canceled_raised, "CancelledError was not raised"
+
+
+@pytest.mark.asyncio
 async def test_timeout_finish_in_time():
     async def long_running_task():
         await asyncio.sleep(0.01)

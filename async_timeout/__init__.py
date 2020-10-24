@@ -128,6 +128,13 @@ class Timeout:
         self._do_exit(exc_type)
         return None
 
+    def __call__(self, f):
+        async def inner(*args, **kargs):
+            with self:
+                return await f(*args, **kargs)
+
+        return inner
+
     @property
     def expired(self) -> bool:
         """Is timeout expired during execution?"""

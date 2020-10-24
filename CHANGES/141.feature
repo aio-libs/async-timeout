@@ -1,0 +1,1 @@
+`timeout` can now also be used as function decorator.
