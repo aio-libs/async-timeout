@@ -6,7 +6,7 @@ import pytest
 from async_timeout import timeout, timeout_at
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_timeout() -> None:
     canceled_raised = False
 
@@ -25,7 +25,7 @@ async def test_timeout() -> None:
     assert canceled_raised, "CancelledError was not raised"
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_timeout_finish_in_time() -> None:
     async def long_running_task() -> str:
         await asyncio.sleep(0.01)
@@ -36,7 +36,7 @@ async def test_timeout_finish_in_time() -> None:
     assert resp == "done"
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_timeout_disable() -> None:
     async def long_running_task() -> str:
         await asyncio.sleep(0.1)
@@ -51,7 +51,7 @@ async def test_timeout_disable() -> None:
     assert 0.09 < dt < 0.3, dt
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_timeout_is_none_no_schedule() -> None:
     async with timeout(None) as cm:
         assert cm._timeout_handler is None
@@ -63,13 +63,13 @@ def test_timeout_no_loop() -> None:
         timeout(None)
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_timeout_zero() -> None:
     with pytest.raises(asyncio.TimeoutError):
         timeout(0)
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_timeout_not_relevant_exception() -> None:
     await asyncio.sleep(0)
     with pytest.raises(KeyError):
@@ -77,7 +77,7 @@ async def test_timeout_not_relevant_exception() -> None:
             raise KeyError
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_timeout_canceled_error_is_not_converted_to_timeout() -> None:
     await asyncio.sleep(0)
     with pytest.raises(asyncio.CancelledError):
@@ -85,7 +85,7 @@ async def test_timeout_canceled_error_is_not_converted_to_timeout() -> None:
             raise asyncio.CancelledError
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_timeout_blocking_loop() -> None:
     async def long_running_task() -> str:
         time.sleep(0.1)
@@ -96,7 +96,7 @@ async def test_timeout_blocking_loop() -> None:
     assert result == "done"
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_for_race_conditions() -> None:
     loop = asyncio.get_event_loop()
     fut = loop.create_future()
@@ -106,7 +106,7 @@ async def test_for_race_conditions() -> None:
     assert resp == "done"
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_timeout_time() -> None:
     foo_running = None
     loop = asyncio.get_event_loop()
@@ -124,7 +124,7 @@ async def test_timeout_time() -> None:
     assert not foo_running
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_outer_coro_is_not_cancelled() -> None:
 
     has_timeout = False
@@ -144,7 +144,7 @@ async def test_outer_coro_is_not_cancelled() -> None:
     assert task.done()
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_cancel_outer_coro() -> None:
     loop = asyncio.get_event_loop()
     fut = loop.create_future()
@@ -162,7 +162,7 @@ async def test_cancel_outer_coro() -> None:
     assert task.done()
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_timeout_suppress_exception_chain() -> None:
     with pytest.raises(asyncio.TimeoutError) as ctx:
         async with timeout(0.01):
@@ -170,7 +170,7 @@ async def test_timeout_suppress_exception_chain() -> None:
     assert not ctx.value.__suppress_context__
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_timeout_expired() -> None:
     with pytest.raises(asyncio.TimeoutError):
         async with timeout(0.01) as cm:
@@ -178,7 +178,7 @@ async def test_timeout_expired() -> None:
     assert cm.expired
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_timeout_inner_timeout_error() -> None:
     with pytest.raises(asyncio.TimeoutError):
         async with timeout(0.01) as cm:
@@ -186,7 +186,7 @@ async def test_timeout_inner_timeout_error() -> None:
     assert not cm.expired
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_timeout_inner_other_error() -> None:
     class MyError(RuntimeError):
         pass
@@ -197,7 +197,7 @@ async def test_timeout_inner_other_error() -> None:
     assert not cm.expired
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_timeout_at() -> None:
     loop = asyncio.get_event_loop()
     with pytest.raises(asyncio.TimeoutError):
@@ -207,7 +207,7 @@ async def test_timeout_at() -> None:
     assert cm.expired
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_timeout_at_not_fired() -> None:
     loop = asyncio.get_event_loop()
     now = loop.time()
@@ -216,7 +216,7 @@ async def test_timeout_at_not_fired() -> None:
     assert not cm.expired
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_expired_after_rejecting() -> None:
     t = timeout(10)
     assert not t.expired
@@ -224,7 +224,7 @@ async def test_expired_after_rejecting() -> None:
     assert not t.expired
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_reject_finished() -> None:
     async with timeout(10) as t:
         await asyncio.sleep(0)
@@ -234,7 +234,7 @@ async def test_reject_finished() -> None:
         t.reject()
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_expired_after_timeout() -> None:
     with pytest.raises(asyncio.TimeoutError):
         async with timeout(0.01) as t:
@@ -243,7 +243,7 @@ async def test_expired_after_timeout() -> None:
     assert t.expired
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_deadline() -> None:
     loop = asyncio.get_event_loop()
     t0 = loop.time()
@@ -253,7 +253,7 @@ async def test_deadline() -> None:
         assert t0 + 1 <= cm.deadline <= t1 + 1
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_async_timeout() -> None:
     with pytest.raises(asyncio.TimeoutError):
         async with timeout(0.01) as cm:
@@ -261,14 +261,14 @@ async def test_async_timeout() -> None:
     assert cm.expired
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_async_no_timeout() -> None:
     async with timeout(1) as cm:
         await asyncio.sleep(0)
     assert not cm.expired
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_shift_to() -> None:
     loop = asyncio.get_event_loop()
     t0 = loop.time()
@@ -280,7 +280,7 @@ async def test_shift_to() -> None:
         assert t1 + 1 <= cm.deadline <= t1 + 1.1
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_shift_by() -> None:
     loop = asyncio.get_event_loop()
     t0 = loop.time()
@@ -292,14 +292,14 @@ async def test_shift_by() -> None:
         assert t1 + 0.999 <= cm.deadline <= t1 + 1.1
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_shift_by_negative_expired() -> None:
     async with timeout(1) as cm:
         with pytest.raises(asyncio.CancelledError):
             cm.shift_by(-1)
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_shift_by_expired() -> None:
     async with timeout(0.001) as cm:
         with pytest.raises(asyncio.CancelledError):
@@ -308,7 +308,7 @@ async def test_shift_by_expired() -> None:
             cm.shift_by(10)
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_shift_to_expired() -> None:
     loop = asyncio.get_event_loop()
     t0 = loop.time()
@@ -319,7 +319,7 @@ async def test_shift_to_expired() -> None:
             cm.shift_to(t0 + 10)
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_shift_by_after_cm_exit() -> None:
     async with timeout(1) as cm:
         await asyncio.sleep(0)
@@ -329,7 +329,7 @@ async def test_shift_by_after_cm_exit() -> None:
         cm.shift_by(1)
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_enter_twice() -> None:
     async with timeout(10) as t:
         await asyncio.sleep(0)
@@ -339,7 +339,7 @@ async def test_enter_twice() -> None:
             await asyncio.sleep(0)
 
 
-@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.asyncio
 async def test_deprecated_with() -> None:
     with pytest.warns(DeprecationWarning):
         with timeout(1):
