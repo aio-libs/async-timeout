@@ -120,7 +120,7 @@ async def test_timeout_time():
                 foo_running = False
 
     dt = loop.time() - start
-    assert 0.09 < dt < 0.2
+    assert 0.09 < dt < 0.3
     assert not foo_running
 
 
