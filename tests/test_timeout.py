@@ -101,7 +101,7 @@ async def test_for_race_conditions() -> None:
     loop = asyncio.get_event_loop()
     fut = loop.create_future()
     loop.call_later(0.1, fut.set_result, "done")
-    async with timeout(0.2):
+    async with timeout(0.5):
         resp = await fut
     assert resp == "done"
 
