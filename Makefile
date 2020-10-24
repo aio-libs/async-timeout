@@ -8,14 +8,12 @@ lint: mypy check black flake8
 
 
 mypy:
-	mypy --config-file setup.cfg async_timeout tests
+	mypy --strict --show-error-codes async_timeout tests
 
 
 black:
 	isort -c $(SOURCES)
-	if python -c "import sys; sys.exit(sys.version_info < (3, 6))"; then \
-	    black --check $(SOURCES); \
-	fi
+	black --check $(SOURCES)
 
 flake8:
 	flake8 $(SOURCES)
