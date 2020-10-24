@@ -8,7 +8,7 @@ from typing import Any, Optional, Type
 from typing_extensions import final
 
 
-__version__ = "4.0.0a2"
+__version__ = "4.0.0a3"
 
 
 __all__ = ("timeout", "timeout_at")
