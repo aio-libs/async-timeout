@@ -202,7 +202,7 @@ class Timeout:
         self._state = _State.TIMEOUT
 
 
-def _current_task(loop: asyncio.AbstractEventLoop) -> "asyncio.Task[Any]":
+def _current_task(loop: asyncio.AbstractEventLoop) -> "Optional[asyncio.Task[Any]]":
     if sys.version_info >= (3, 7):
         return asyncio.current_task(loop=loop)
     else:

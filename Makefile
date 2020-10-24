@@ -12,7 +12,7 @@ mypy:
 
 
 black:
-	isort -c -rc $(SOURCES)
+	isort -c $(SOURCES)
 	if python -c "import sys; sys.exit(sys.version_info < (3, 6))"; then \
 	    black --check $(SOURCES); \
 	fi
@@ -22,7 +22,7 @@ flake8:
 
 
 fmt:
-	isort -rc $(SOURCES)
+	isort $(SOURCES)
 	black $(SOURCES)
 
 
