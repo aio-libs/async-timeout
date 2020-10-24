@@ -90,7 +90,7 @@ jobs:
       env:
         COLOR: 'yes'
       run: |
-        make test
+        pytest tests
         python -m coverage xml
     - name: Upload coverage
       uses: codecov/codecov-action@v1
