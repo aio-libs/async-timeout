@@ -130,7 +130,7 @@ class Timeout:
 
     def __call__(self, f):
         async def inner(*args, **kargs):
-            with self:
+            async with self:
                 return await f(*args, **kargs)
 
         return inner
