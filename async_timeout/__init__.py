@@ -192,7 +192,7 @@ class Timeout:
         if (
             exc_type is asyncio.CancelledError and self._state == _State.TIMEOUT
         ) or (
-            self._loop.time() > self._deadline
+            self.deadline is not None and self._loop.time() > self.deadline
         ):
             self._timeout_handler = None
             raise asyncio.TimeoutError
