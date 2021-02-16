@@ -189,9 +189,7 @@ class Timeout:
         self._state = _State.ENTER
 
     def _do_exit(self, exc_type: Type[BaseException]) -> None:
-        if (
-            exc_type is asyncio.CancelledError and self._state == _State.TIMEOUT
-        ) or (
+        if (exc_type is asyncio.CancelledError and self._state == _State.TIMEOUT) or (
             self.deadline is not None and self._loop.time() > self.deadline
         ):
             self._timeout_handler = None
