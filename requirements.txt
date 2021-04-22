@@ -1,7 +1,7 @@
 isort==5.8.0
 black==20.8b1; implementation_name=="cpython"
 pytest==6.2.3
-pytest-asyncio==0.15.0
+pytest-asyncio==0.15.1
 pytest-cov==2.11.1
 docutils==0.17.1
 mypy==0.812; implementation_name=="cpython"
