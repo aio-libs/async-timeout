@@ -1,5 +1,5 @@
 isort==5.8.0
-black==21.4b1; implementation_name=="cpython"
+black==21.4b2; implementation_name=="cpython"
 pytest==6.2.3
 pytest-asyncio==0.15.1
 pytest-cov==2.11.1
