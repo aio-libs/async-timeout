@@ -1,6 +1,6 @@
 isort==5.8.0
 black==21.4b2; implementation_name=="cpython"
-pytest==6.2.3
+pytest==6.2.4
 pytest-asyncio==0.15.1
 pytest-cov==2.11.1
 docutils==0.17.1
