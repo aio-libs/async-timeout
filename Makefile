@@ -8,7 +8,7 @@ lint: mypy check black flake8
 
 
 mypy:
-	mypy --strict --show-error-codes async_timeout tests
+	mypy
 
 
 black:
