@@ -1,5 +1,6 @@
 import asyncio
 import time
+import sys
 
 import pytest
 
@@ -346,15 +347,16 @@ async def test_deprecated_with() -> None:
             await asyncio.sleep(0)
 
 
+@pytest.mark.skipif(sys.version_info < (3, 7))
 @pytest.mark.asyncio
-async def test_race_condition_cancel_before():
+async def test_race_condition_cancel_before() -> None:
     """Test race condition when cancelling before timeout.
 
     If cancel happens immediately before the timeout, then
     the timeout may overrule the cancellation, making it
     impossible to cancel some tasks.
     """
-    async def test_task(deadline, loop):
+    async def test_task(deadline: float, loop: asyncio.Loop) -> None:
         with Timeout(deadline, loop):
             await asyncio.sleep(10)
 
@@ -368,15 +370,16 @@ async def test_race_condition_cancel_before():
         await t
 
 
+@pytest.mark.skipif(sys.version_info < (3, 7))
 @pytest.mark.asyncio
-async def test_race_condition_cancel_after():
+async def test_race_condition_cancel_after() -> None:
     """Test race condition when cancelling after timeout.
 
     Similarly to the previous test, if a cancel happens
     immediately after the timeout (but before the __exit__),
     then the explicit cancel can get overruled again.
     """
-    async def test_task(deadline, loop):
+    async def test_task(deadline: float, loop: asyncio.Loop) -> None:
         with Timeout(deadline, loop):
             await asyncio.sleep(10)
 
