@@ -356,7 +356,7 @@ async def test_race_condition_cancel_before() -> None:
     the timeout may overrule the cancellation, making it
     impossible to cancel some tasks.
     """
-    async def test_task(deadline: float, loop: asyncio.Loop) -> None:
+    async def test_task(deadline: float, loop: asyncio.AbstractEventLoop) -> None:
         with Timeout(deadline, loop):
             await asyncio.sleep(10)
 
@@ -379,7 +379,7 @@ async def test_race_condition_cancel_after() -> None:
     immediately after the timeout (but before the __exit__),
     then the explicit cancel can get overruled again.
     """
-    async def test_task(deadline: float, loop: asyncio.Loop) -> None:
+    async def test_task(deadline: float, loop: asyncio.AbstractEventLoop) -> None:
         with Timeout(deadline, loop):
             await asyncio.sleep(10)
 
