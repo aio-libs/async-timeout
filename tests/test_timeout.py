@@ -358,6 +358,8 @@ async def test_race_condition_cancel_before() -> None:
     """
 
     async def test_task(deadline: float, loop: asyncio.AbstractEventLoop) -> None:
+        # We need the internal Timeout class to specify the deadline (not delay).
+        # This is needed to create the precise timing to reproduce the race condition.
         with Timeout(deadline, loop):
             await asyncio.sleep(10)
 
@@ -382,6 +384,8 @@ async def test_race_condition_cancel_after() -> None:
     """
 
     async def test_task(deadline: float, loop: asyncio.AbstractEventLoop) -> None:
+        # We need the internal Timeout class to specify the deadline (not delay).
+        # This is needed to create the precise timing to reproduce the race condition.
         with Timeout(deadline, loop):
             await asyncio.sleep(10)
 
