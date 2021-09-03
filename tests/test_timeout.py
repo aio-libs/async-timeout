@@ -373,6 +373,9 @@ async def test_race_condition_cancel_before() -> None:
         await t
 
 
+@pytest.mark.xfail(
+    reason="The test is CPU performance sensitive, might fail on slow CI box"
+)
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="Not supported in 3.6")
 @pytest.mark.asyncio
 async def test_race_condition_cancel_after() -> None:
