@@ -193,9 +193,11 @@ class Timeout:
 
     def _do_exit(self, exc_type: Type[BaseException], exc_val: BaseException) -> None:
         if sys.version_info >= (3, 9):
-            was_timeout_cancelled = lambda: _SENTINEL in exc_val.args
+            def was_timeout_cancelled():
+                return _SENTINEL in exc_val.args
         else:
-            was_timeout_cancelled = lambda: self._state == _State.TIMEOUT
+            def was_timeout_cancelled():
+                return self._state == _State.TIMEOUT
         if exc_type is asyncio.CancelledError and was_timeout_cancelled():
             self._timeout_handler = None
             raise asyncio.TimeoutError
