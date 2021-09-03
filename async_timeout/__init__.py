@@ -145,7 +145,7 @@ class Timeout:
         # cancel is maybe better name but
         # task.cancel() raises CancelledError in asyncio world.
         if self._state not in (_State.INIT, _State.ENTER):
-            raise RuntimeError("invalid state {}".format(self._state.value))
+            raise RuntimeError(f"invalid state {self._state.value}")
         self._reject()
 
     def _reject(self) -> None:
@@ -188,7 +188,7 @@ class Timeout:
 
     def _do_enter(self) -> None:
         if self._state != _State.INIT:
-            raise RuntimeError("invalid state {}".format(self._state.value))
+            raise RuntimeError(f"invalid state {self._state.value}")
         self._state = _State.ENTER
 
     def _do_exit(self, exc_type: Type[BaseException], exc_val: BaseException) -> None:
