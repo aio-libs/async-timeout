@@ -14,6 +14,9 @@ __version__ = "4.0.0a3"
 __all__ = ("timeout", "timeout_at")
 
 
+_SENTINEL = object()
+
+
 def timeout(delay: Optional[float]) -> "Timeout":
     """timeout context manager.
 
@@ -112,7 +115,7 @@ class Timeout:
         exc_val: BaseException,
         exc_tb: TracebackType,
     ) -> Optional[bool]:
-        self._do_exit(exc_type)
+        self._do_exit(exc_type, exc_val)
         return None
 
     async def __aenter__(self) -> "Timeout":
@@ -125,7 +128,7 @@ class Timeout:
         exc_val: BaseException,
         exc_tb: TracebackType,
     ) -> Optional[bool]:
-        self._do_exit(exc_type)
+        self._do_exit(exc_type, exc_val)
         return None
 
     @property
@@ -188,20 +191,28 @@ class Timeout:
             raise RuntimeError("invalid state {}".format(self._state.value))
         self._state = _State.ENTER
 
-    def _do_exit(self, exc_type: Type[BaseException]) -> None:
-        if exc_type is asyncio.CancelledError and self._state == _State.TIMEOUT:
+    def _do_exit(self, exc_type: Type[BaseException], exc_val: BaseException) -> None:
+        if sys.version_info >= (3, 9):
+            was_timeout_cancelled = lambda: _SENTINEL in exc_val.args
+        else:
+            was_timeout_cancelled = lambda: self._state == _State.TIMEOUT
+        if exc_type is asyncio.CancelledError and was_timeout_cancelled():
             self._timeout_handler = None
             raise asyncio.TimeoutError
-        # timeout is not expired
+        # timeout has not expired
         self._state = _State.EXIT
         self._reject()
         return None
 
     def _on_timeout(self, task: "asyncio.Task[None]") -> None:
         # See Issue #229 and PR #230 for details
-        if task._fut_waiter and task._fut_waiter.cancelled():  # type: ignore[attr-defined]  # noqa: E501
+        if sys.version_info < (3, 9) and task._fut_waiter and task._fut_waiter.cancelled():  # type: ignore[attr-defined]  # noqa: E501
             return
-        task.cancel()
+
+        if sys.version_info >= (3, 9):
+            task.cancel(_SENTINEL)
+        else:
+            task.cancel()
         self._state = _State.TIMEOUT
 
 
