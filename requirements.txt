@@ -6,4 +6,5 @@ pytest-cov==2.12.1
 docutils==0.17.1
 mypy==0.910; implementation_name=="cpython"
 flake8==3.9.2
+pre-commit==2.15
 -e .
