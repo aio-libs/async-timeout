@@ -198,6 +198,7 @@ class Timeout:
         return None
 
     def _on_timeout(self, task: "asyncio.Task[None]") -> None:
+        # See Issue #229 and PR #230 for details      
         if task._fut_waiter and task._fut_waiter.cancelled():  # type: ignore[attr-defined]  # noqa: E501
             return
         task.cancel()
