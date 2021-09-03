@@ -194,12 +194,12 @@ class Timeout:
     def _do_exit(self, exc_type: Type[BaseException], exc_val: BaseException) -> None:
         if sys.version_info >= (3, 9):
 
-            def was_timeout_cancelled():
+            def was_timeout_cancelled() -> bool:
                 return _SENTINEL in exc_val.args
 
         else:
 
-            def was_timeout_cancelled():
+            def was_timeout_cancelled() -> bool:
                 return self._state == _State.TIMEOUT
 
         if exc_type is asyncio.CancelledError and was_timeout_cancelled():
