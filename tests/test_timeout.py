@@ -360,14 +360,14 @@ async def test_race_condition_cancel_before() -> None:
     async def test_task(deadline: float, loop: asyncio.AbstractEventLoop) -> None:
         # We need the internal Timeout class to specify the deadline (not delay).
         # This is needed to create the precise timing to reproduce the race condition.
-        with Timeout(deadline, loop):
-            await asyncio.sleep(10)
+        with pytest.warns(DeprecationWarning):
+            with Timeout(deadline, loop):
+                await asyncio.sleep(10)
 
     loop = asyncio.get_running_loop()
     deadline = loop.time() + 1
     t = asyncio.create_task(test_task(deadline, loop))
     loop.call_at(deadline, t.cancel)
-    await asyncio.sleep(1.1)
     # If we get a TimeoutError, then the code is broken.
     with pytest.raises(asyncio.CancelledError):
         await t
@@ -386,14 +386,14 @@ async def test_race_condition_cancel_after() -> None:
     async def test_task(deadline: float, loop: asyncio.AbstractEventLoop) -> None:
         # We need the internal Timeout class to specify the deadline (not delay).
         # This is needed to create the precise timing to reproduce the race condition.
-        with Timeout(deadline, loop):
-            await asyncio.sleep(10)
+        with pytest.warns(DeprecationWarning):
+            with Timeout(deadline, loop):
+                await asyncio.sleep(10)
 
     loop = asyncio.get_running_loop()
     deadline = loop.time() + 1
     t = asyncio.create_task(test_task(deadline, loop))
-    loop.call_at(deadline + 0.000001, t.cancel)
-    await asyncio.sleep(1.1)
+    loop.call_at(deadline + 0.0000000000001, t.cancel)
     # If we get a TimeoutError, then the code is broken.
     with pytest.raises(asyncio.CancelledError):
         await t
