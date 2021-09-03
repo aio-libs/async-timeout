@@ -372,6 +372,7 @@ async def test_race_condition_cancel_before() -> None:
     with pytest.raises(asyncio.CancelledError):
         await t
 
+
 @pytest.mark.xfail(reason="Can't see a way to fix this currently.")
 @pytest.mark.skipif(sys.version_info < (3, 9), reason="Can't be fixed in <3.9.")
 @pytest.mark.asyncio
