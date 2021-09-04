@@ -142,7 +142,7 @@ class Timeout:
         # cancel is maybe better name but
         # task.cancel() raises CancelledError in asyncio world.
         if self._state not in (_State.INIT, _State.ENTER):
-            raise RuntimeError("invalid state {}".format(self._state.value))
+            raise RuntimeError(f"invalid state {self._state.value}")
         self._reject()
 
     def _reject(self) -> None:
@@ -179,30 +179,31 @@ class Timeout:
             else:
                 # state is ENTER
                 raise asyncio.CancelledError
-        self._timeout_handler = self._loop.call_at(
-            deadline, self._on_timeout, self._task
-        )
+        self._timeout_handler = self._loop.call_at(deadline, self._on_timeout)
 
     def _do_enter(self) -> None:
         if self._state != _State.INIT:
-            raise RuntimeError("invalid state {}".format(self._state.value))
+            raise RuntimeError(f"invalid state {self._state.value}")
         self._state = _State.ENTER
 
     def _do_exit(self, exc_type: Type[BaseException]) -> None:
+        self._task = None  # Early drop circular reference
         if exc_type is asyncio.CancelledError and self._state == _State.TIMEOUT:
             self._timeout_handler = None
             raise asyncio.TimeoutError
-        # timeout is not expired
+        # timeout is not expired, propagate the exception
         self._state = _State.EXIT
         self._reject()
         return None
 
-    def _on_timeout(self, task: "asyncio.Task[None]") -> None:
+    def _on_timeout(self) -> None:
         # See Issue #229 and PR #230 for details
-        if task._fut_waiter and task._fut_waiter.cancelled():  # type: ignore[attr-defined]  # noqa: E501
-            return
-        task.cancel()
-        self._state = _State.TIMEOUT
+        self._loop.call_soon(self._cancel)
+
+    def _cancel(self) -> None:
+        if self._task is not None:
+            self._task.cancel()
+            self._state = _State.TIMEOUT
 
 
 def _current_task(loop: asyncio.AbstractEventLoop) -> "Optional[asyncio.Task[Any]]":
