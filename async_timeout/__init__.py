@@ -142,7 +142,7 @@ class Timeout:
         # cancel is maybe better name but
         # task.cancel() raises CancelledError in asyncio world.
         if self._state not in (_State.INIT, _State.ENTER):
-            raise RuntimeError("invalid state {}".format(self._state.value))
+            raise RuntimeError(f"invalid state {self._state.value}")
         self._reject()
 
     def _reject(self) -> None:
@@ -185,7 +185,7 @@ class Timeout:
 
     def _do_enter(self) -> None:
         if self._state != _State.INIT:
-            raise RuntimeError("invalid state {}".format(self._state.value))
+            raise RuntimeError(f"invalid state {self._state.value}")
         self._state = _State.ENTER
 
     def _do_exit(self, exc_type: Type[BaseException]) -> None:
@@ -205,17 +205,27 @@ class Timeout:
         self._state = _State.TIMEOUT
 
 
-def _current_task(loop: asyncio.AbstractEventLoop) -> "Optional[asyncio.Task[Any]]":
-    if sys.version_info >= (3, 7):
+if sys.version_info >= (3, 7):
+
+    def _current_task(loop: asyncio.AbstractEventLoop) -> "Optional[asyncio.Task[Any]]":
         return asyncio.current_task(loop=loop)
-    else:
+
+
+else:
+
+    def _current_task(loop: asyncio.AbstractEventLoop) -> "Optional[asyncio.Task[Any]]":
         return asyncio.Task.current_task(loop=loop)
 
 
-def _get_running_loop() -> asyncio.AbstractEventLoop:
-    if sys.version_info >= (3, 7):
+if sys.version_info >= (3, 7):
+
+    def _get_running_loop() -> asyncio.AbstractEventLoop:
         return asyncio.get_running_loop()
-    else:
+
+
+else:
+
+    def _get_running_loop() -> asyncio.AbstractEventLoop:
         loop = asyncio.get_event_loop()
         if not loop.is_running():
             raise RuntimeError("no running event loop")

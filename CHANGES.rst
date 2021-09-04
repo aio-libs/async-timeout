@@ -10,8 +10,6 @@ CHANGES
 
 * Deprecate synchronous context manager usage
 
-* Don't raise `TimeoutError` if the task already have been cancelled explicitly (#229)
-
 3.0.1 (2018-10-09)
 ------------------
 
