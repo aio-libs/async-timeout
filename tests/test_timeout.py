@@ -373,9 +373,9 @@ async def test_race_condition_cancel_before() -> None:
         await t
 
 
-@pytest.mark.xfail(
-    reason="The test is CPU performance sensitive, might fail on slow CI box"
-)
+# @pytest.mark.xfail(
+#    reason="The test is CPU performance sensitive, might fail on slow CI box"
+# )
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="Not supported in 3.6")
 @pytest.mark.asyncio
 async def test_race_condition_cancel_after() -> None:
@@ -396,7 +396,7 @@ async def test_race_condition_cancel_after() -> None:
     loop = asyncio.get_running_loop()
     deadline = loop.time() + 1
     t = asyncio.create_task(test_task(deadline, loop))
-    loop.call_at(deadline + 0.0000000000001, t.cancel)
+    loop.call_at(deadline + 0.00000000001, t.cancel)
     # If we get a TimeoutError, then the code is broken.
     with pytest.raises(asyncio.CancelledError):
         await t
