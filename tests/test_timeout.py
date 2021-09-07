@@ -1,10 +1,26 @@
 import asyncio
 import sys
 import time
+from functools import wraps
+from typing import Any, Callable, List, TypeVar
 
 import pytest
 
 from async_timeout import Timeout, timeout, timeout_at
+
+
+_Func = TypeVar("_Func", bound=Callable[..., Any])
+
+
+def log_func(func: _Func, msg: str, call_order: List[str]) -> _Func:
+    """Simple wrapper to add a log to call_order when the function is called."""
+
+    @wraps(func)
+    def wrapper(*args: Any, **kwargs: Any) -> Any:  # type: ignore[misc]
+        call_order.append(msg)
+        return func(*args, **kwargs)
+
+    return wrapper  # type: ignore[return-value]
 
 
 @pytest.mark.asyncio
@@ -347,6 +363,33 @@ async def test_deprecated_with() -> None:
             await asyncio.sleep(0)
 
 
+async def race_condition(offset: float = 0) -> List[str]:
+    """Common code for below race condition tests."""
+
+    async def test_task(deadline: float, loop: asyncio.AbstractEventLoop) -> None:
+        # We need the internal Timeout class to specify the deadline (not delay).
+        # This is needed to create the precise timing to reproduce the race condition.
+        with pytest.warns(DeprecationWarning):
+            with Timeout(deadline, loop):
+                await asyncio.sleep(10)
+
+    call_order: List[str] = []
+    f_exit = log_func(Timeout._do_exit, "exit", call_order)
+    Timeout._do_exit = f_exit  # type: ignore[assignment]
+    f_timeout = log_func(Timeout._on_timeout, "timeout", call_order)
+    Timeout._on_timeout = f_timeout  # type: ignore[assignment]
+
+    loop = asyncio.get_running_loop()
+    deadline = loop.time() + 1
+    t = asyncio.create_task(test_task(deadline, loop))
+    loop.call_at(deadline + offset, log_func(t.cancel, "cancel", call_order))
+    # If we get a TimeoutError, then the code is broken.
+    with pytest.raises(asyncio.CancelledError):
+        await t
+
+    return call_order
+
+
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="Not supported in 3.6")
 @pytest.mark.asyncio
 async def test_race_condition_cancel_before() -> None:
@@ -356,27 +399,15 @@ async def test_race_condition_cancel_before() -> None:
     the timeout may overrule the cancellation, making it
     impossible to cancel some tasks.
     """
+    call_order = await race_condition()
 
-    async def test_task(deadline: float, loop: asyncio.AbstractEventLoop) -> None:
-        # We need the internal Timeout class to specify the deadline (not delay).
-        # This is needed to create the precise timing to reproduce the race condition.
-        with pytest.warns(DeprecationWarning):
-            with Timeout(deadline, loop):
-                await asyncio.sleep(10)
-
-    loop = asyncio.get_running_loop()
-    deadline = loop.time() + 1
-    t = asyncio.create_task(test_task(deadline, loop))
-    loop.call_at(deadline, t.cancel)
-    # If we get a TimeoutError, then the code is broken.
-    with pytest.raises(asyncio.CancelledError):
-        await t
+    # This test is very timing dependant, so we check the order that calls
+    # happened to be sure the test itself ran correctly.
+    assert call_order == ["cancel", "timeout", "exit"]
 
 
-@pytest.mark.xfail(
-    reason="The test is CPU performance sensitive, might fail on slow CI box"
-)
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="Not supported in 3.6")
+@pytest.mark.xfail(reason="Can't see a way to fix this currently.")
+@pytest.mark.skipif(sys.version_info < (3, 9), reason="Can't be fixed in <3.9.")
 @pytest.mark.asyncio
 async def test_race_condition_cancel_after() -> None:
     """Test race condition when cancelling after timeout.
@@ -385,18 +416,8 @@ async def test_race_condition_cancel_after() -> None:
     immediately after the timeout (but before the __exit__),
     then the explicit cancel can get overruled again.
     """
+    call_order = await race_condition(0.000001)
 
-    async def test_task(deadline: float, loop: asyncio.AbstractEventLoop) -> None:
-        # We need the internal Timeout class to specify the deadline (not delay).
-        # This is needed to create the precise timing to reproduce the race condition.
-        with pytest.warns(DeprecationWarning):
-            with Timeout(deadline, loop):
-                await asyncio.sleep(10)
-
-    loop = asyncio.get_running_loop()
-    deadline = loop.time() + 1
-    t = asyncio.create_task(test_task(deadline, loop))
-    loop.call_at(deadline + 0.0000000000001, t.cancel)
-    # If we get a TimeoutError, then the code is broken.
-    with pytest.raises(asyncio.CancelledError):
-        await t
+    # This test is very timing dependant, so we check the order that calls
+    # happened to be sure the test itself ran correctly.
+    assert call_order == ["timeout", "cancel", "exit"]
