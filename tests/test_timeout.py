@@ -1,10 +1,21 @@
 import asyncio
 import sys
 import time
+from typing import Callable, List
+from functools import wraps
 
 import pytest
 
 from async_timeout import Timeout, timeout, timeout_at
+
+
+def log_func(func: Callable, msg: str, call_order: List[str]):
+    """Simple wrapper to add a log to call_order when the function is called."""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        call_order.append(msg)
+        return func(*args, **kwargs)
+    return wrapper
 
 
 @pytest.mark.asyncio
@@ -364,19 +375,25 @@ async def test_race_condition_cancel_before() -> None:
             with Timeout(deadline, loop):
                 await asyncio.sleep(10)
 
+    call_order = []
+    Timeout._do_exit = log_func(Timeout._do_exit, "exit", call_order)
+    Timeout._on_timeout = log_func(Timeout._on_timeout, "timeout", call_order)
+
     loop = asyncio.get_running_loop()
     deadline = loop.time() + 1
     t = asyncio.create_task(test_task(deadline, loop))
-    loop.call_at(deadline, t.cancel)
+    loop.call_at(deadline, log_func(t.cancel, "cancel", call_order))
     # If we get a TimeoutError, then the code is broken.
     with pytest.raises(asyncio.CancelledError):
         await t
 
+    # This test is very timing dependant, so we check the order that calls
+    # happened to be sure the test itself ran correctly.
+    assert call_order == ["cancel", "timeout", "exit"]
 
-@pytest.mark.xfail(
-    reason="The test is CPU performance sensitive, might fail on slow CI box"
-)
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="Not supported in 3.6")
+
+@pytest.mark.xfail(reason="Can't see a way to fix this currently.")
+@pytest.mark.skipif(sys.version_info < (3, 9), reason="Can't be fixed in <3.9.")
 @pytest.mark.asyncio
 async def test_race_condition_cancel_after() -> None:
     """Test race condition when cancelling after timeout.
@@ -393,10 +410,18 @@ async def test_race_condition_cancel_after() -> None:
             with Timeout(deadline, loop):
                 await asyncio.sleep(10)
 
+    call_order = []
+    Timeout._do_exit = log_func(Timeout._do_exit, "exit", call_order)
+    Timeout._on_timeout = log_func(Timeout._on_timeout, "timeout", call_order)
+
     loop = asyncio.get_running_loop()
     deadline = loop.time() + 1
     t = asyncio.create_task(test_task(deadline, loop))
-    loop.call_at(deadline + 0.0000000000001, t.cancel)
+    loop.call_at(deadline + .000001, log_func(t.cancel, "cancel", call_order))
     # If we get a TimeoutError, then the code is broken.
     with pytest.raises(asyncio.CancelledError):
         await t
+
+    # This test is very timing dependant, so we check the order that calls
+    # happened to be sure the test itself ran correctly.
+    assert call_order == ["timeout", "cancel", "exit"]
