@@ -1,8 +1,8 @@
 import asyncio
 import sys
 import time
-from typing import Callable, List
 from functools import wraps
+from typing import Callable, List
 
 import pytest
 
@@ -11,10 +11,12 @@ from async_timeout import Timeout, timeout, timeout_at
 
 def log_func(func: Callable, msg: str, call_order: List[str]):
     """Simple wrapper to add a log to call_order when the function is called."""
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         call_order.append(msg)
         return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -417,7 +419,7 @@ async def test_race_condition_cancel_after() -> None:
     loop = asyncio.get_running_loop()
     deadline = loop.time() + 1
     t = asyncio.create_task(test_task(deadline, loop))
-    loop.call_at(deadline + .000001, log_func(t.cancel, "cancel", call_order))
+    loop.call_at(deadline + 0.000001, log_func(t.cancel, "cancel", call_order))
     # If we get a TimeoutError, then the code is broken.
     with pytest.raises(asyncio.CancelledError):
         await t
