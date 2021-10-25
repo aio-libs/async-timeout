@@ -5,7 +5,7 @@ repos:
   - id: check-merge-conflict
     exclude: "rst$"
 - repo: https://github.com/asottile/yesqa
-  rev: v1.2.3
+  rev: v1.3.0
   hooks:
   - id: yesqa
 - repo: https://github.com/PyCQA/isort
