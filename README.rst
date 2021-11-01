@@ -73,8 +73,8 @@ Not finished yet timeout can be rescheduled by ``shift_by()``
 or ``shift_to()`` methods::
 
    async with timeout(1.5) as cm:
-       cm.shift_by(1)  # add another second on waiting
-       cm.shift_to(loop.time() + 5)  # reschedule to now+5 seconds
+       cm.shift(1)  # add another second on waiting
+       cm.update(loop.time() + 5)  # reschedule to now+5 seconds
 
 Rescheduling is forbidden if the timeout is expired or after exit from ``async with``
 code block.
