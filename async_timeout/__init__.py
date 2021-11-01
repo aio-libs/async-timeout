@@ -201,7 +201,7 @@ class Timeout:
         if exc_type is asyncio.CancelledError and self._state == _State.TIMEOUT:
             self._timeout_handler = None
             raise asyncio.TimeoutError
-        # timeout is not expired
+        # timeout has not expired
         self._state = _State.EXIT
         self._reject()
         return None
