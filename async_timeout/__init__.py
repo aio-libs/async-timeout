@@ -38,7 +38,7 @@ def timeout(delay: Optional[float]) -> "Timeout":
 def timeout_at(deadline: Optional[float]) -> "Timeout":
     """Schedule the timeout at absolute time.
 
-    deadline arguments points on the time in the same clock system
+    deadline argument points on the time in the same clock system
     as loop.time().
 
     Please note: it is not POSIX time but a time with
@@ -95,7 +95,7 @@ class Timeout:
         if deadline is None:
             self._deadline = None  # type: Optional[float]
         else:
-            self.shift_to(deadline)
+            self.update(deadline)
 
     def __enter__(self) -> "Timeout":
         warnings.warn(
@@ -150,19 +150,28 @@ class Timeout:
             self._timeout_handler.cancel()
             self._timeout_handler = None
 
-    def shift_by(self, delay: float) -> None:
+    def shift(self, delay: float) -> None:
         """Advance timeout on delay seconds.
 
         The delay can be negative.
+
+        Raise RuntimeError if shift is called when deadline is not scheduled
         """
-        now = self._loop.time()
-        self.shift_to(now + delay)
+        deadline = self._deadline
+        if deadline is None:
+            raise RuntimeError("cannot shift timeout if deadline is not scheduled")
+        self.update(deadline + delay)
 
-    def shift_to(self, deadline: float) -> None:
-        """Advance timeout on the abdelay seconds.
+    def update(self, deadline: float) -> None:
+        """Set deadline to absolute value.
 
-        If new deadline is in the past
-        the timeout is raised immediatelly.
+        deadline argument points on the time in the same clock system
+        as loop.time().
+
+        If new deadline is in the past the timeout is raised immediatelly.
+
+        Please note: it is not POSIX time but a time with
+        undefined starting base, e.g. the time of the system power on.
         """
         if self._state == _State.EXIT:
             raise RuntimeError("cannot reschedule after exit from context manager")

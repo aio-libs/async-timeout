@@ -286,34 +286,32 @@ async def test_async_no_timeout() -> None:
 
 
 @pytest.mark.asyncio
-async def test_shift_to() -> None:
+async def test_shift() -> None:
     loop = asyncio.get_event_loop()
     t0 = loop.time()
     async with timeout(1) as cm:
         t1 = loop.time()
         assert cm.deadline is not None
         assert t0 + 1 <= cm.deadline <= t1 + 1
-        cm.shift_to(t1 + 1)
-        assert t1 + 1 <= cm.deadline <= t1 + 1.1
+        cm.shift(1)
+        assert t0 + 2 <= cm.deadline <= t0 + 2.1
 
 
 @pytest.mark.asyncio
-async def test_shift_by() -> None:
-    loop = asyncio.get_event_loop()
-    t0 = loop.time()
-    async with timeout(1) as cm:
-        t1 = loop.time()
-        assert cm.deadline is not None
-        assert t0 + 1 <= cm.deadline <= t1 + 1
-        cm.shift_by(1)
-        assert t1 + 0.999 <= cm.deadline <= t1 + 1.1
+async def test_shift_nonscheduled() -> None:
+    async with timeout(None) as cm:
+        with pytest.raises(
+            RuntimeError,
+            match="cannot shift timeout if deadline is not scheduled",
+        ):
+            cm.shift(1)
 
 
 @pytest.mark.asyncio
 async def test_shift_by_negative_expired() -> None:
     async with timeout(1) as cm:
         with pytest.raises(asyncio.CancelledError):
-            cm.shift_by(-1)
+            cm.shift(-1)
 
 
 @pytest.mark.asyncio
@@ -322,7 +320,7 @@ async def test_shift_by_expired() -> None:
         with pytest.raises(asyncio.CancelledError):
             await asyncio.sleep(10)
         with pytest.raises(RuntimeError, match="cannot reschedule expired timeout"):
-            cm.shift_by(10)
+            cm.shift(10)
 
 
 @pytest.mark.asyncio
@@ -333,7 +331,7 @@ async def test_shift_to_expired() -> None:
         with pytest.raises(asyncio.CancelledError):
             await asyncio.sleep(10)
         with pytest.raises(RuntimeError, match="cannot reschedule expired timeout"):
-            cm.shift_to(t0 + 10)
+            cm.update(t0 + 10)
 
 
 @pytest.mark.asyncio
@@ -343,7 +341,7 @@ async def test_shift_by_after_cm_exit() -> None:
     with pytest.raises(
         RuntimeError, match="cannot reschedule after exit from context manager"
     ):
-        cm.shift_by(1)
+        cm.shift(1)
 
 
 @pytest.mark.asyncio
