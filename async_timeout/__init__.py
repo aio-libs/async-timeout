@@ -214,17 +214,27 @@ class Timeout:
         self._state = _State.TIMEOUT
 
 
-def _current_task(loop: asyncio.AbstractEventLoop) -> "Optional[asyncio.Task[Any]]":
-    if sys.version_info >= (3, 7):
+if sys.version_info >= (3, 7):
+
+    def _current_task(loop: asyncio.AbstractEventLoop) -> "Optional[asyncio.Task[Any]]":
         return asyncio.current_task(loop=loop)
-    else:
+
+
+else:
+
+    def _current_task(loop: asyncio.AbstractEventLoop) -> "Optional[asyncio.Task[Any]]":
         return asyncio.Task.current_task(loop=loop)
 
 
-def _get_running_loop() -> asyncio.AbstractEventLoop:
-    if sys.version_info >= (3, 7):
+if sys.version_info >= (3, 7):
+
+    def _get_running_loop() -> asyncio.AbstractEventLoop:
         return asyncio.get_running_loop()
-    else:
+
+
+else:
+
+    def _get_running_loop() -> asyncio.AbstractEventLoop:
         loop = asyncio.get_event_loop()
         if not loop.is_running():
             raise RuntimeError("no running event loop")
