@@ -5,15 +5,15 @@ repos:
   - id: check-merge-conflict
     exclude: "rst$"
 - repo: https://github.com/asottile/yesqa
-  rev: v1.2.3
+  rev: v1.3.0
   hooks:
   - id: yesqa
-- repo: https://github.com/pre-commit/mirrors-isort
-  rev: 'v5.9.3'
+- repo: https://github.com/PyCQA/isort
+  rev: '5.9.3'
   hooks:
   - id: isort
 - repo: https://github.com/psf/black
-  rev: '21.8b0'
+  rev: '21.9b0'
   hooks:
     - id: black
       language_version: python3 # Should be a command that runs python3.6+
@@ -41,11 +41,11 @@ repos:
     files: |
       .gitignore
 - repo: https://github.com/asottile/pyupgrade
-  rev: 'v2.25.0'
+  rev: 'v2.29.0'
   hooks:
   - id: pyupgrade
     args: ['--py36-plus']
-- repo: https://gitlab.com/pycqa/flake8
-  rev: '3.9.2'
+- repo: https://github.com/PyCQA/flake8
+  rev: '4.0.1'
   hooks:
   - id: flake8
