@@ -1,7 +1,7 @@
 CHANGES
 =======
 
-4.0.1 (2121-11-xx)
+4.0.1 (2121-11-10)
 ------------------
 
 - Fix regression:
@@ -21,7 +21,7 @@ CHANGES
 
 * Supported ``timeout.deadline`` and ``timeout.expired`` properties.
 
-* Drooped ``timeout.remaining`` property: it can be calculated as
+* Dropped ``timeout.remaining`` property: it can be calculated as
   ``timeout.deadline - loop.time()``
 
 * Dropped ``timeout.timeout`` property that returns a relative timeout based on the
