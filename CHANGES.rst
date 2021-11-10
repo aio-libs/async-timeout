@@ -16,6 +16,8 @@ CHANGES
 
   (#258)
 
+- Make ``Timeout`` class available in ``__all__``.
+
 4.0.0 (2021-11-01)
 ------------------
 

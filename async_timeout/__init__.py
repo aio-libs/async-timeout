@@ -11,7 +11,7 @@ from typing_extensions import final
 __version__ = "4.0.1"
 
 
-__all__ = ("timeout", "timeout_at")
+__all__ = ("timeout", "timeout_at", "Timeout")
 
 
 def timeout(delay: Optional[float]) -> "Timeout":
