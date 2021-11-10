@@ -5,10 +5,13 @@ CHANGES
 ------------------
 
 - Fix regression:
+
   1. Don't raise TimeoutError from timeout object that doesn't enter into async context
      manager
+
   2. Use call_soon() for raising TimeoutError if deadline is reached on entering into
      async context manager
+
   (#258)
 
 4.0.0 (2021-11-01)
