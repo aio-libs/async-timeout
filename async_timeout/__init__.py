@@ -80,16 +80,13 @@ class Timeout:
     # The purpose is to time out as sson as possible
     # without waiting for the next await expression.
 
-    __slots__ = ("_deadline", "_loop", "_state", "_task", "_timeout_handler")
+    __slots__ = ("_deadline", "_loop", "_state", "_timeout_handler")
 
     def __init__(
         self, deadline: Optional[float], loop: asyncio.AbstractEventLoop
     ) -> None:
         self._loop = loop
         self._state = _State.INIT
-
-        task = _current_task(self._loop)
-        self._task = task
 
         self._timeout_handler = None  # type: Optional[asyncio.Handle]
         if deadline is None:
@@ -180,22 +177,30 @@ class Timeout:
         if self._timeout_handler is not None:
             self._timeout_handler.cancel()
         self._deadline = deadline
+        if self._state != _State.INIT:
+            self._reschedule()
+
+    def _reschedule(self) -> None:
+        assert self._state == _State.ENTER
+        deadline = self._deadline
+        if deadline is None:
+            return
+
         now = self._loop.time()
+        if self._timeout_handler is not None:
+            self._timeout_handler.cancel()
+
+        task = _current_task(self._loop)
         if deadline <= now:
-            self._timeout_handler = None
-            if self._state == _State.INIT:
-                raise asyncio.TimeoutError
-            else:
-                # state is ENTER
-                raise asyncio.CancelledError
-        self._timeout_handler = self._loop.call_at(
-            deadline, self._on_timeout, self._task
-        )
+            self._timeout_handler = self._loop.call_soon(self._on_timeout, task)
+        else:
+            self._timeout_handler = self._loop.call_at(deadline, self._on_timeout, task)
 
     def _do_enter(self) -> None:
         if self._state != _State.INIT:
             raise RuntimeError(f"invalid state {self._state.value}")
         self._state = _State.ENTER
+        self._reschedule()
 
     def _do_exit(self, exc_type: Type[BaseException]) -> None:
         if exc_type is asyncio.CancelledError and self._state == _State.TIMEOUT:
@@ -209,6 +214,8 @@ class Timeout:
     def _on_timeout(self, task: "asyncio.Task[None]") -> None:
         task.cancel()
         self._state = _State.TIMEOUT
+        # drop the reference early
+        self._timeout_handler = None
 
 
 if sys.version_info >= (3, 7):
