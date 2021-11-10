@@ -119,7 +119,7 @@ jobs:
       with:
         changes_file: CHANGES.rst
         name: async-timeout
-        version_file: async-timeout/__init__.py
+        version_file: async_timeout/__init__.py
         github_token: ${{ secrets.GITHUB_TOKEN }}
         pypi_token: ${{ secrets.PYPI_TOKEN }}
         fix_issue_regex: '\(`#(\\d+) <https://github.com/aio-libs/async-timeout/issues/\\1>`_\)'
