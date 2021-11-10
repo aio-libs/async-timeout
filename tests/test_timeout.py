@@ -82,7 +82,8 @@ def test_timeout_no_loop() -> None:
 @pytest.mark.asyncio
 async def test_timeout_zero() -> None:
     with pytest.raises(asyncio.TimeoutError):
-        timeout(0)
+        async with timeout(0):
+            await asyncio.sleep(10)
 
 
 @pytest.mark.asyncio
@@ -307,10 +308,11 @@ async def test_shift_nonscheduled() -> None:
 
 
 @pytest.mark.asyncio
-async def test_shift_by_negative_expired() -> None:
+async def test_shift_negative_expired() -> None:
     async with timeout(1) as cm:
         with pytest.raises(asyncio.CancelledError):
             cm.shift(-1)
+            await asyncio.sleep(10)
 
 
 @pytest.mark.asyncio
