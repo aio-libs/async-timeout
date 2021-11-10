@@ -1,0 +1,1 @@
+Use stdlib typing.final in Python 3.8+, limiting typing-extensions dependency to older Python versions.
