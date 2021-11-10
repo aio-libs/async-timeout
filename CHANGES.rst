@@ -1,10 +1,11 @@
+=======
 CHANGES
 =======
 
 .. towncrier release notes start
 
 4.0.1 (2121-11-10)
-------------------
+==================
 
 - Fix regression:
 
@@ -19,7 +20,7 @@ CHANGES
 - Make ``Timeout`` class available in ``__all__``.
 
 4.0.0 (2021-11-01)
-------------------
+==================
 
 * Implemented ``timeout_at(deadline)`` (#117)
 
@@ -38,25 +39,25 @@ CHANGES
 * Deprecated synchronous context manager usage
 
 3.0.1 (2018-10-09)
-------------------
+==================
 
 * More aggressive typing (#48)
 
 3.0.0 (2018-05-05)
-------------------
+==================
 
 * Drop Python 3.4, the minimal supported version is Python 3.5.3
 
 * Provide type annotations
 
 2.0.1 (2018-03-13)
-------------------
+==================
 
 * Fix ``PendingDeprecationWarning`` on Python 3.7 (#33)
 
 
 2.0.0 (2017-10-09)
-------------------
+==================
 
 * Changed ``timeout <= 0`` behaviour
 
@@ -65,7 +66,7 @@ CHANGES
   * when timeout <= 0 ``TimeoutError`` raised faster
 
 1.4.0 (2017-09-09)
-------------------
+==================
 
 * Implement ``remaining`` property (#20)
 
@@ -75,7 +76,7 @@ CHANGES
   * All others: roughly amount of time before ``TimeoutError`` is triggered
 
 1.3.0 (2017-08-23)
-------------------
+==================
 
 * Don't suppress nested exception on timeout. Exception context points
   on cancelled line with suspended ``await`` (#13)
@@ -85,13 +86,13 @@ CHANGES
 * Add methods for using as async context manager (#9)
 
 1.2.1 (2017-05-02)
-------------------
+==================
 
 * Support unpublished event loop's "current_task" api.
 
 
 1.2.0 (2017-03-11)
-------------------
+==================
 
 * Extra check on context manager exit
 
@@ -99,11 +100,11 @@ CHANGES
 
 
 1.1.0 (2016-10-20)
-------------------
+==================
 
 * Rename to ``async-timeout``
 
 1.0.0 (2016-09-09)
-------------------
+==================
 
 * The first release.
