@@ -5,7 +5,11 @@ import warnings
 from types import TracebackType
 from typing import Any, Optional, Type
 
-from typing_extensions import final
+
+if sys.version_info >= (3, 8):
+    from typing import final
+else:
+    from typing_extensions import final
 
 
 __version__ = "4.0.1"
