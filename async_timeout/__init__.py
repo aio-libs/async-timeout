@@ -227,7 +227,6 @@ if sys.version_info >= (3, 7):
     def _current_task(loop: asyncio.AbstractEventLoop) -> "Optional[asyncio.Task[Any]]":
         return asyncio.current_task(loop=loop)
 
-
 else:
 
     def _current_task(loop: asyncio.AbstractEventLoop) -> "Optional[asyncio.Task[Any]]":
@@ -238,7 +237,6 @@ if sys.version_info >= (3, 7):
 
     def _get_running_loop() -> asyncio.AbstractEventLoop:
         return asyncio.get_running_loop()
-
 
 else:
 
