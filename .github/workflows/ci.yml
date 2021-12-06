@@ -33,22 +33,14 @@ jobs:
         restore-keys: |
             pip-lint-
     - name: Install dependencies
-      uses: py-actions/py-dependency-install@v2
-      with:
-        path: requirements.txt
-    - name: Install itself
       run: |
-        python setup.py install
+        make install
     - name: Run linter
       run: |
         make lint
-    - name: Prepare twine checker
-      run: |
-        pip install -U twine wheel
-        python setup.py sdist bdist_wheel
     - name: Run twine checker
       run: |
-        twine check dist/*
+        make check
 
   test:
     name: Test
@@ -81,9 +73,8 @@ jobs:
         restore-keys: |
             pip-ci-${{ runner.os }}-${{ matrix.pyver }}-
     - name: Install dependencies
-      uses: py-actions/py-dependency-install@v2
-      with:
-        path: requirements.txt
+      run: |
+        make install
     - name: Run unittests
       env:
         COLOR: 'yes'
@@ -109,8 +100,8 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v2
     - name: Install dependencies
-      run:
-        python -m pip install -U pip wheel twine build
+      run: |
+        make install
     - name: Make dists
       run:
         python -m build

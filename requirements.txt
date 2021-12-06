@@ -1,10 +1,9 @@
 -e .
-black==21.11b1; implementation_name=="cpython"
+build==0.7.0
 docutils==0.18.1
-flake8==4.0.1
-isort==5.10.1
 mypy==0.910; implementation_name=="cpython"
 pre-commit==2.16.0
 pytest==6.2.5
 pytest-asyncio==0.16.0
 pytest-cov==3.0.0
+twine==3.7.0

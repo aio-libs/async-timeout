@@ -1,28 +1,21 @@
-SOURCES = setup.py async_timeout tests
-
 test: lint
 	pytest tests
 
-
-lint: mypy check black flake8
-
-
-mypy:
+lint: fmt
 	mypy
 
-
-black:
-	isort -c $(SOURCES)
-	black --check $(SOURCES)
-
-flake8:
-	flake8 $(SOURCES)
-
-
 fmt:
-	isort $(SOURCES)
-	black $(SOURCES)
+ifdef CI
+	pre-commit run --all-files --show-diff-on-failure
+else
+	pre-commit run --all-files
+endif
 
 
 check:
-	python setup.py check -rms
+	python -m build
+	twine check dist/*
+
+install:
+	pip install -U pip
+	pip install -r requirements.txt
