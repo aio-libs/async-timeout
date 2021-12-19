@@ -109,9 +109,9 @@ class Timeout:
 
     def __exit__(
         self,
-        exc_type: Type[BaseException],
-        exc_val: BaseException,
-        exc_tb: TracebackType,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
     ) -> Optional[bool]:
         self._do_exit(exc_type)
         return None
@@ -122,9 +122,9 @@ class Timeout:
 
     async def __aexit__(
         self,
-        exc_type: Type[BaseException],
-        exc_val: BaseException,
-        exc_tb: TracebackType,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
     ) -> Optional[bool]:
         self._do_exit(exc_type)
         return None
@@ -206,7 +206,7 @@ class Timeout:
         self._state = _State.ENTER
         self._reschedule()
 
-    def _do_exit(self, exc_type: Type[BaseException]) -> None:
+    def _do_exit(self, exc_type: Optional[Type[BaseException]]) -> None:
         if exc_type is asyncio.CancelledError and self._state == _State.TIMEOUT:
             self._timeout_handler = None
             raise asyncio.TimeoutError
