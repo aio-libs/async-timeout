@@ -12,7 +12,7 @@ else:
     from typing_extensions import final
 
 
-__version__ = "4.0.1"
+__version__ = "4.0.2"
 
 
 __all__ = ("timeout", "timeout_at", "Timeout")

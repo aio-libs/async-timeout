@@ -4,6 +4,15 @@ CHANGES
 
 .. towncrier release notes start
 
+4.0.2 (2021-12-20)4.0.2 (2021-12-20)
+==================
+
+Misc
+----
+
+- `#259 <https://github.com/aio-libs/async-timeout/issues/259>`_, `#274 <https://github.com/aio-libs/async-timeout/issues/274>`_
+
+
 4.0.1 (2121-11-10)
 ==================
 
