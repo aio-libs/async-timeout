@@ -4,7 +4,7 @@ CHANGES
 
 .. towncrier release notes start
 
-4.0.2 (2021-12-20)4.0.2 (2021-12-20)
+4.0.2 (2021-12-20)
 ==================
 
 Misc
