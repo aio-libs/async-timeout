@@ -79,9 +79,9 @@ class Timeout:
     #
     # This design allows to avoid many silly misusages.
     #
-    # TimeoutError is raised immadiatelly when scheduled
+    # TimeoutError is raised immediately when scheduled
     # if the deadline is passed.
-    # The purpose is to time out as sson as possible
+    # The purpose is to time out as soon as possible
     # without waiting for the next await expression.
 
     __slots__ = ("_deadline", "_loop", "_state", "_timeout_handler")
