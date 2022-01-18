@@ -3,7 +3,7 @@ import enum
 import sys
 import warnings
 from types import TracebackType
-from typing import Any, Optional, Type
+from typing import Optional, Type
 
 
 if sys.version_info >= (3, 8):
@@ -31,7 +31,7 @@ def timeout(delay: Optional[float]) -> "Timeout":
 
     delay - value in seconds or None to disable timeout logic
     """
-    loop = _get_running_loop()
+    loop = asyncio.get_running_loop()
     if delay is not None:
         deadline = loop.time() + delay  # type: Optional[float]
     else:
@@ -54,7 +54,7 @@ def timeout_at(deadline: Optional[float]) -> "Timeout":
 
 
     """
-    loop = _get_running_loop()
+    loop = asyncio.get_running_loop()
     return Timeout(deadline, loop)
 
 
@@ -194,7 +194,7 @@ class Timeout:
         if self._timeout_handler is not None:
             self._timeout_handler.cancel()
 
-        task = _current_task(self._loop)
+        task = asyncio.current_task()
         if deadline <= now:
             self._timeout_handler = self._loop.call_soon(self._on_timeout, task)
         else:
@@ -220,28 +220,3 @@ class Timeout:
         self._state = _State.TIMEOUT
         # drop the reference early
         self._timeout_handler = None
-
-
-if sys.version_info >= (3, 7):
-
-    def _current_task(loop: asyncio.AbstractEventLoop) -> "Optional[asyncio.Task[Any]]":
-        return asyncio.current_task(loop=loop)
-
-else:
-
-    def _current_task(loop: asyncio.AbstractEventLoop) -> "Optional[asyncio.Task[Any]]":
-        return asyncio.Task.current_task(loop=loop)
-
-
-if sys.version_info >= (3, 7):
-
-    def _get_running_loop() -> asyncio.AbstractEventLoop:
-        return asyncio.get_running_loop()
-
-else:
-
-    def _get_running_loop() -> asyncio.AbstractEventLoop:
-        loop = asyncio.get_event_loop()
-        if not loop.is_running():
-            raise RuntimeError("no running event loop")
-        return loop
