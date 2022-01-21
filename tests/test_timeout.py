@@ -47,7 +47,8 @@ async def test_timeout_finish_in_time() -> None:
         await asyncio.sleep(0.01)
         return "done"
 
-    async with timeout(0.1):
+    # timeout should be long enough to work even on slow bisy test boxes
+    async with timeout(0.5):
         resp = await long_running_task()
     assert resp == "done"
 
