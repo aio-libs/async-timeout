@@ -1,21 +1,21 @@
 test: lint
-	pytest tests
+	python -m pytest tests
 
 lint: fmt
-	mypy
+	python -m mypy
 
 fmt:
 ifdef CI
-	pre-commit run --all-files --show-diff-on-failure
+	python -m pre_commit run --all-files --show-diff-on-failure
 else
-	pre-commit run --all-files
+	python -m pre_commit run --all-files
 endif
 
 
 check:
 	python -m build
-	twine check dist/*
+	python -m twine check dist/*
 
 install:
-	pip install --user -U pip
-	pip install --user -r requirements.txt
+	python -m pip install --user -U pip
+	python -m pip install --user -r requirements.txt
