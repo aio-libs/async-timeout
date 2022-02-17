@@ -366,9 +366,12 @@ async def test_deprecated_with() -> None:
 @pytest.mark.asyncio
 async def test_double_timeouts() -> None:
     with pytest.raises(asyncio.TimeoutError):
-        async with timeout(0.2):
-            async with timeout(0.1):
+        async with timeout(0.1) as cm1:
+            async with timeout(0.1) as cm2:
                 await asyncio.sleep(10)
+
+    assert cm1.expired
+    assert cm2.expired
 
 
 @pytest.mark.asyncio
@@ -377,18 +380,21 @@ async def test_timeout_with_cancelled_task() -> None:
     event = asyncio.Event()
 
     async def coro() -> None:
-        event.wait()  # a barrier emulation
-        async with timeout(0):  # on the next loop iteration
+        event.set()
+        async with timeout_cm:
             await asyncio.sleep(5)
 
     async def main() -> str:
         task = asyncio.create_task(coro())
-        await event.wait()  # a barrier emulation
+        await event.wait()
+        loop = asyncio.get_running_loop()
+        timeout_cm.update(loop.time())  # reschedule to the next loop iteration
         task.cancel()
         with pytest.raises(asyncio.CancelledError):
             await task
         return "ok"
 
+    timeout_cm = timeout(3600)  # reschedule just before the usage
     task2 = asyncio.create_task(main())
-    event.set()  # a barrier emulation
     assert "ok" == await task2
+    assert timeout_cm.expired

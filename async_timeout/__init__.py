@@ -222,8 +222,9 @@ class Timeout:
                 if sys.version_info >= (3, 11):
                     asyncio.current_task().uncancel()
                 raise asyncio.TimeoutError
-        # timeout has not expired
-        self._state = _State.EXIT
+        # state is EXIT if not timed out previously
+        if self._state != _State.TIMEOUT:
+            self._state = _State.EXIT
         self._reject()
         return None
 
