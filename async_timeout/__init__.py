@@ -228,6 +228,7 @@ class Timeout:
         return None
 
     def _on_timeout(self, task: "asyncio.Task[None]") -> None:
+        # Note: the second '.cancel()' call is ignored on Python 3.11
         if sys.version_info >= (3, 9):
             task.cancel(id(self))
         else:
