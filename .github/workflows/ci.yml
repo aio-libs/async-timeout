@@ -19,7 +19,7 @@ jobs:
   lint:
     name: Linter
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 30 # pre-commit env update can take time
     steps:
     - name: Checkout
       uses: actions/checkout@v2
