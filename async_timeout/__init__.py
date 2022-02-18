@@ -216,7 +216,7 @@ class Timeout:
             if sys.version_info >= (3, 9):
                 # Analyse msg
                 assert exc_val is not None
-                if exc_val.args and exc_val.args[0] != id(self):
+                if not exc_val.args or exc_val.args[0] != id(self):
                     skip = True
             if not skip:
                 if sys.version_info >= (3, 11):
