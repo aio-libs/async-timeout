@@ -220,3 +220,16 @@ class Timeout:
         self._state = _State.TIMEOUT
         # drop the reference early
         self._timeout_handler = None
+
+    def signal(self) -> None:
+        """Immediately cause the deadline to be considered to have
+        passed.
+
+        This will wake up a poentially sleeping task, such as when it
+        is requied to service some external condition.
+
+        Can be called at any time, even after the context manager
+        has exited.
+        """
+        if self._state in (_State.INIT, _State.ENTER):
+            self.update(self._loop.time())

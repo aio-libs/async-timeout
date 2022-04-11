@@ -361,3 +361,54 @@ async def test_deprecated_with() -> None:
     with pytest.warns(DeprecationWarning):
         with timeout(1):
             await asyncio.sleep(0)
+
+
+@pytest.mark.asyncio
+async def test_signal_init() -> None:
+    """Test that signalling a Timeout in init state is ok
+    and causes immediate timeout when entered
+    """
+    t = timeout(10)
+    t.signal()
+    with pytest.raises(asyncio.TimeoutError):
+        async with t:
+            await asyncio.sleep(0)
+
+
+@pytest.mark.asyncio
+async def test_signal_exited() -> None:
+    """Test that signalling a Timeout in exited state is ok
+    and causes immediate timeout when entered
+    """
+    t = timeout(10)
+    async with t:
+        await asyncio.sleep(0)
+    t.signal()
+
+
+@pytest.mark.asyncio
+async def test_signal_exited() -> None:
+    """Test that signalling a Timeout in waiting state causes
+    timeout
+    """
+    t = timeout(100)
+    state = [None]
+
+    async def task():
+        loop = asyncio.get_running_loop()
+        now = loop.time()
+        with pytest.raises(asyncio.TimeoutError):
+            async with t:
+                state[0] = "sleeping"
+                await asyncio.sleep(10)
+        assert loop.time() - now < 5
+        state[0] = "awoke"
+
+    # start the task, wait for it to fall asleep
+    task = asyncio.create_task(task())
+    await asyncio.sleep(0.1)
+    assert state[0] == "sleeping"
+    # signal it
+    t.signal()
+    await task
+    assert state[0] == "awoke"
