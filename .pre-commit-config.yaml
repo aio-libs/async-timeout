@@ -1,6 +1,6 @@
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: 'v4.1.0'
+  rev: 'v4.2.0'
   hooks:
   - id: check-merge-conflict
     exclude: "rst$"
@@ -18,7 +18,7 @@ repos:
     - id: black
       language_version: python3 # Should be a command that runs python3.6+
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: 'v4.1.0'
+  rev: 'v4.2.0'
   hooks:
   - id: check-case-conflict
   - id: check-json
@@ -35,13 +35,13 @@ repos:
   - id: debug-statements
 # Another entry is required to apply file-contents-sorter to another file
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: 'v4.1.0'
+  rev: 'v4.2.0'
   hooks:
   - id: file-contents-sorter
     files: |
       .gitignore
 - repo: https://github.com/asottile/pyupgrade
-  rev: 'v2.31.1'
+  rev: 'v2.32.0'
   hooks:
   - id: pyupgrade
     args: ['--py36-plus']
