@@ -387,7 +387,7 @@ async def test_signal_exited() -> None:
 
 
 @pytest.mark.asyncio
-async def test_signal_exited() -> None:
+async def test_signal_raises() -> None:
     """Test that signalling a Timeout in waiting state causes
     timeout
     """
