@@ -1,0 +1,3 @@
+.. code-block:: rst
+
+    Added the ``Timeout.signal()`` method
