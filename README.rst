@@ -79,6 +79,9 @@ or ``shift_to()`` methods::
 Rescheduling is forbidden if the timeout is expired or after exit from ``async with``
 code block.
 
+A context manager can be scheduled into the past with the ``signal()`` method.
+This can be used from a separate task to wake up a sleeping task.  It can be
+called even if the context manager has been exited.
 
 Installation
 ------------
