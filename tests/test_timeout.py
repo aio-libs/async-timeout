@@ -391,24 +391,29 @@ async def test_signal_raises() -> None:
     """Test that signalling a Timeout in waiting state causes
     timeout
     """
-    t = timeout(100)
     state = [None]
+    t = timeout(100)
+    event = asyncio.Event()
 
-    async def task():
+    async def sleeper():
+        nonlocal t
         loop = asyncio.get_running_loop()
         now = loop.time()
         with pytest.raises(asyncio.TimeoutError):
             async with t:
                 state[0] = "sleeping"
+                event.set()
                 await asyncio.sleep(10)
         assert loop.time() - now < 5
         state[0] = "awoke"
 
     # start the task, wait for it to fall asleep
-    task = asyncio.create_task(task())
-    await asyncio.sleep(0.1)
+    task = asyncio.create_task(sleeper())
+    await event.wait()
     assert state[0] == "sleeping"
     # signal it
     t.signal()
-    await task
+    # use shield, so that if we accidentally cancel _this_ task it doesn't automatically get passed down
+    # to the sleeper
+    await asyncio.shield(task)
     assert state[0] == "awoke"

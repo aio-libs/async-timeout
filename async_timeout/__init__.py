@@ -84,7 +84,7 @@ class Timeout:
     # The purpose is to time out as soon as possible
     # without waiting for the next await expression.
 
-    __slots__ = ("_deadline", "_loop", "_state", "_timeout_handler")
+    __slots__ = ("_deadline", "_loop", "_state", "_timeout_handler", "_task")
 
     def __init__(
         self, deadline: Optional[float], loop: asyncio.AbstractEventLoop
@@ -97,6 +97,7 @@ class Timeout:
             self._deadline = None  # type: Optional[float]
         else:
             self.update(deadline)
+        self._task = None
 
     def __enter__(self) -> "Timeout":
         warnings.warn(
@@ -194,7 +195,7 @@ class Timeout:
         if self._timeout_handler is not None:
             self._timeout_handler.cancel()
 
-        task = asyncio.current_task()
+        task = self._task
         if deadline <= now:
             self._timeout_handler = self._loop.call_soon(self._on_timeout, task)
         else:
@@ -204,6 +205,7 @@ class Timeout:
         if self._state != _State.INIT:
             raise RuntimeError(f"invalid state {self._state.value}")
         self._state = _State.ENTER
+        self._task = asyncio.current_task()
         self._reschedule()
 
     def _do_exit(self, exc_type: Optional[Type[BaseException]]) -> None:
@@ -212,6 +214,7 @@ class Timeout:
             raise asyncio.TimeoutError
         # timeout has not expired
         self._state = _State.EXIT
+        self._task = None
         self._reject()
         return None
 
