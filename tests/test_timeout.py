@@ -413,7 +413,7 @@ async def test_signal_raises() -> None:
     assert state[0] == "sleeping"
     # signal it
     t.signal()
-    # use shield, so that if we accidentally cancel _this_ task it doesn't automatically get passed down
-    # to the sleeper
+    # use shield, so that if we accidentally cancel _this_ task
+    # it doesn't automatically get passed down to the sleeper
     await asyncio.shield(task)
     assert state[0] == "awoke"
