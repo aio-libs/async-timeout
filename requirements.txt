@@ -2,7 +2,7 @@
 build==0.10.0
 docutils==0.19
 mypy==0.991; implementation_name=="cpython"
-pre-commit==2.21.0
+pre-commit==3.1.1
 pytest==7.2.1
 pytest-asyncio==0.20.3
 pytest-cov==4.0.0
