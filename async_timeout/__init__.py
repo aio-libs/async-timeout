@@ -113,7 +113,7 @@ class Timeout:
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> Optional[bool]:
-        self._do_exit(exc_type)
+        self._do_exit(exc_type, exc_val)
         return None
 
     async def __aenter__(self) -> "Timeout":
@@ -126,7 +126,7 @@ class Timeout:
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> Optional[bool]:
-        self._do_exit(exc_type)
+        self._do_exit(exc_type, exc_val)
         return None
 
     @property
@@ -206,17 +206,34 @@ class Timeout:
         self._state = _State.ENTER
         self._reschedule()
 
-    def _do_exit(self, exc_type: Optional[Type[BaseException]]) -> None:
+    def _do_exit(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+    ) -> None:
         if exc_type is asyncio.CancelledError and self._state == _State.TIMEOUT:
-            self._timeout_handler = None
-            raise asyncio.TimeoutError
-        # timeout has not expired
-        self._state = _State.EXIT
+            skip = False
+            if sys.version_info >= (3, 9):
+                # Analyse msg
+                assert exc_val is not None
+                if not exc_val.args or exc_val.args[0] != id(self):
+                    skip = True
+            if not skip:
+                if sys.version_info >= (3, 11):
+                    asyncio.current_task().uncancel()
+                raise asyncio.TimeoutError
+        # state is EXIT if not timed out previously
+        if self._state != _State.TIMEOUT:
+            self._state = _State.EXIT
         self._reject()
         return None
 
     def _on_timeout(self, task: "asyncio.Task[None]") -> None:
-        task.cancel()
+        # Note: the second '.cancel()' call is ignored on Python 3.11
+        if sys.version_info >= (3, 9):
+            task.cancel(id(self))
+        else:
+            task.cancel()
         self._state = _State.TIMEOUT
         # drop the reference early
         self._timeout_handler = None
