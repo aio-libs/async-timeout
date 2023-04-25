@@ -25,6 +25,7 @@ because ``timeout`` doesn't create a new task.
 The ``timeout(delay, *, loop=None)`` call returns a context manager
 that cancels a block on *timeout* expiring::
 
+   from async_timeout import timeout
    async with timeout(1.5):
        await inner()
 
