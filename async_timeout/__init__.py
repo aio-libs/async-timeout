@@ -14,12 +14,12 @@ else:
 
 if sys.version_info >= (3, 11):
 
-    def _uncancel_task(task: "asyncio.Task"):
+    def _uncancel_task(task: asyncio.Task[object]) -> None:
         task.uncancel()
 
 else:
 
-    def _uncancel_task(task: "asyncio.Task"):
+    def _uncancel_task(task: asyncio.Task[object]) -> None:
         pass
 
 
@@ -103,7 +103,7 @@ class Timeout:
         self._loop = loop
         self._state = _State.INIT
 
-        self._task = None  # type: Optional[asyncio.Handle]
+        self._task: Optional[asyncio.Task[object]] = None
         self._timeout_handler = None  # type: Optional[asyncio.Handle]
         if deadline is None:
             self._deadline = None  # type: Optional[float]
@@ -221,6 +221,7 @@ class Timeout:
 
     def _do_exit(self, exc_type: Optional[Type[BaseException]]) -> None:
         if exc_type is asyncio.CancelledError and self._state == _State.TIMEOUT:
+            assert self._task is not None
             _uncancel_task(self._task)
             self._timeout_handler = None
             self._task = None
@@ -231,6 +232,7 @@ class Timeout:
         return None
 
     def _on_timeout(self) -> None:
+        assert self._task is not None
         self._task.cancel()
         self._state = _State.TIMEOUT
         # drop the reference early
