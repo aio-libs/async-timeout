@@ -41,7 +41,9 @@ async def test_timeout() -> None:
             assert t._loop is asyncio.get_event_loop()
     assert canceled_raised, "CancelledError was not raised"
     if sys.version_info >= (3, 11):
-        assert not asyncio.current_task().cancelling()
+        t = asyncio.current_task()
+        assert t is not None
+        assert not t.cancelling()
 
 
 @pytest.mark.asyncio
