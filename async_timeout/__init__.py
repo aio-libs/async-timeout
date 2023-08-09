@@ -103,7 +103,7 @@ class Timeout:
         self._loop = loop
         self._state = _State.INIT
 
-        self._task: Optional[asyncio.Task[object]] = None
+        self._task: Optional["asyncio.Task[object]"] = None
         self._timeout_handler = None  # type: Optional[asyncio.Handle]
         if deadline is None:
             self._deadline = None  # type: Optional[float]
