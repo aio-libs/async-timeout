@@ -13,9 +13,12 @@ else:
 
 
 if sys.version_info >= (3, 11):
+
     def _uncancel_task(task: "asyncio.Task"):
         task.uncancel()
+
 else:
+
     def _uncancel_task(task: "asyncio.Task"):
         pass
 
