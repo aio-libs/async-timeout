@@ -149,7 +149,6 @@ async def test_timeout_time() -> None:
 
 @pytest.mark.asyncio
 async def test_outer_coro_is_not_cancelled() -> None:
-
     has_timeout = False
 
     async def outer() -> None:
