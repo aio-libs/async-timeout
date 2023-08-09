@@ -1,4 +1,5 @@
 import asyncio
+import sys
 import time
 from functools import wraps
 from typing import Any, Callable, List, TypeVar
@@ -39,6 +40,10 @@ async def test_timeout() -> None:
             await long_running_task()
             assert t._loop is asyncio.get_event_loop()
     assert canceled_raised, "CancelledError was not raised"
+    if sys.version_info >= (3, 11):
+        task = asyncio.current_task()
+        assert task is not None
+        assert not task.cancelling()
 
 
 @pytest.mark.asyncio
@@ -144,7 +149,6 @@ async def test_timeout_time() -> None:
 
 @pytest.mark.asyncio
 async def test_outer_coro_is_not_cancelled() -> None:
-
     has_timeout = False
 
     async def outer() -> None:
@@ -159,6 +163,8 @@ async def test_outer_coro_is_not_cancelled() -> None:
     await task
     assert has_timeout
     assert not task.cancelled()
+    if sys.version_info >= (3, 11):
+        assert not task.cancelling()
     assert task.done()
 
 
