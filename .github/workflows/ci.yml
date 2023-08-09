@@ -49,7 +49,7 @@ jobs:
     needs: lint
     strategy:
       matrix:
-        pyver: ["3.7", "3.8", "3.9", "3.10", "3.11-dev"]
+        pyver: ["3.7", "3.8", "3.9", "3.10", "3.11"]
         os: [ubuntu, macos, windows]
         include:
           - pyver: pypy-3.9
@@ -84,7 +84,7 @@ jobs:
         python -m pytest tests
         python -m coverage xml
     - name: Upload coverage
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v3
       with:
         file: ./coverage.xml
         flags: unit
@@ -110,7 +110,7 @@ jobs:
       run:
         python -m build
     - name: Make Release
-      uses: aio-libs/create-release@v1.2.3
+      uses: aio-libs/create-release@v1.6.6
       with:
         changes_file: CHANGES.rst
         name: async-timeout
