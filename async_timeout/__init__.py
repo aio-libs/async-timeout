@@ -14,12 +14,12 @@ else:
 
 if sys.version_info >= (3, 11):
 
-    def _uncancel_task(task: asyncio.Task[object]) -> None:
+    def _uncancel_task(task: "asyncio.Task[object]") -> None:
         task.uncancel()
 
 else:
 
-    def _uncancel_task(task: asyncio.Task[object]) -> None:
+    def _uncancel_task(task: "asyncio.Task[object]") -> None:
         pass
 
 
