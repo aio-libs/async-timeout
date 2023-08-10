@@ -1,6 +1,6 @@
 -e .
 build==0.10.0
-docutils==0.19
+docutils==0.20.1
 mypy==1.4.1; implementation_name=="cpython"
 pre-commit==2.21.0
 pytest==7.4.0
