@@ -4,6 +4,13 @@ CHANGES
 
 .. towncrier release notes start
 
+4.0.3 (2023-08-10)
+==================
+
+* Fixed compatibility with asyncio.timeout() on Python 3.11+.
+* Added support for Python 3.11.
+* Dropped support for Python 3.6.
+
 4.0.2 (2021-12-20)
 ==================
 
