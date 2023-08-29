@@ -3,13 +3,7 @@ import enum
 import sys
 import warnings
 from types import TracebackType
-from typing import Optional, Type
-
-
-if sys.version_info >= (3, 8):
-    from typing import final
-else:
-    from typing_extensions import final
+from typing import Optional, Type, final
 
 
 if sys.version_info >= (3, 11):
