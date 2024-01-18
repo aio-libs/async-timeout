@@ -83,4 +83,4 @@ File :file:`CHANGES/553.feature.rst`:
 
 
 .. _Towncrier philosophy:
-   https://towncrier.readthedocs.io/en/actual-freaking-docs/#philosophy
+   https://towncrier.readthedocs.io/en/stable/#philosophy
