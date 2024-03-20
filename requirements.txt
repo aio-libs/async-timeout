@@ -4,6 +4,6 @@ docutils==0.20.1
 mypy==1.4.1; implementation_name=="cpython"
 pre-commit==2.21.0
 pytest==7.4.4
-pytest-asyncio==0.21.1
+pytest-asyncio==0.23.6
 pytest-cov==4.1.0
 twine==4.0.2
