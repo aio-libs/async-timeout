@@ -13,6 +13,26 @@ async-timeout
 asyncio-compatible timeout context manager.
 
 
+
+DEPRECATED
+----------
+
+This library has effectively been upstreamed into Python 3.11+. Therefore this library
+is considered deprecated and no longer supported. We'll keep the project open in the
+unlikely case of security issues until Python 3.10 is officially unsupported.
+
+To migrate a project that needs to support multiple Python versions, we suggest
+using this code (used in our other projects, such as aiohttp)::
+
+   if sys.version_info >= (3, 11):
+       import asyncio as async_timeout
+   else:
+       import async_timeout
+
+Then in your dependencies, use::
+
+   async-timeout >= 4; python_version < "3.11"
+
 Usage example
 -------------
 
