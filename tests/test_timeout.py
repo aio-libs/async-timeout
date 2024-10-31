@@ -360,10 +360,3 @@ async def test_enter_twice() -> None:
     with pytest.raises(RuntimeError, match="invalid state EXIT"):
         async with t:
             await asyncio.sleep(0)
-
-
-@pytest.mark.asyncio
-async def test_deprecated_with() -> None:
-    with pytest.warns(DeprecationWarning):
-        with timeout(1):
-            await asyncio.sleep(0)

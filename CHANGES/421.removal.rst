@@ -1,0 +1,1 @@
+Drop deprecated sync context manager support, use ``async with timeout(...): ...`` instead.
