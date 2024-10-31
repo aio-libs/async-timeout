@@ -186,6 +186,7 @@ async def test_cancel_outer_coro() -> None:
     assert task.done()
 
 
+@pytest.mark.skipif(sys.version_info >= (3, 11), reason="3.11+ has a different implementation")
 @pytest.mark.asyncio
 async def test_timeout_suppress_exception_chain() -> None:
     with pytest.raises(asyncio.TimeoutError) as ctx:
@@ -200,6 +201,26 @@ async def test_timeout_expired() -> None:
         async with timeout(0.01) as cm:
             await asyncio.sleep(10)
     assert cm.expired
+
+
+@pytest.mark.skipif(sys.version_info < (3, 11), reason="Old versions don't support expired method")
+@pytest.mark.asyncio
+async def test_timeout_expired_as_function() -> None:
+    with pytest.raises(asyncio.TimeoutError):
+        async with timeout(0.01) as cm:
+            await asyncio.sleep(10)
+    assert cm.expired()
+
+
+@pytest.mark.skipif(sys.version_info < (3, 11), reason="Old versions don't support expired method")
+@pytest.mark.asyncio
+async def test_timeout_expired_methods() -> None:
+    async with timeout(0.01) as cm:
+        exp = cm.expired()
+        assert not exp
+        assert bool(exp) is False
+        assert str(exp) == "False"
+        assert repr(exp) == "False"
 
 
 @pytest.mark.asyncio
@@ -242,10 +263,10 @@ async def test_timeout_at_not_fired() -> None:
 
 @pytest.mark.asyncio
 async def test_expired_after_rejecting() -> None:
-    t = timeout(10)
-    assert not t.expired
-    t.reject()
-    assert not t.expired
+    async with timeout(10) as t:
+        assert not t.expired
+        t.reject()
+        assert not t.expired
 
 
 @pytest.mark.asyncio
@@ -254,7 +275,7 @@ async def test_reject_finished() -> None:
         await asyncio.sleep(0)
 
     assert not t.expired
-    with pytest.raises(RuntimeError, match="invalid state EXIT"):
+    with pytest.raises(RuntimeError, match="(invalid state EXIT)|(Cannot change state of finished Timeout)"):
         t.reject()
 
 
@@ -327,7 +348,10 @@ async def test_shift_by_expired() -> None:
     async with timeout(0.001) as cm:
         with pytest.raises(asyncio.CancelledError):
             await asyncio.sleep(10)
-        with pytest.raises(RuntimeError, match="cannot reschedule expired timeout"):
+        with pytest.raises(
+                RuntimeError,
+                match=("(cannot reschedule expired timeout)|"
+                       "(Cannot change state of expiring Timeout)")):
             cm.shift(10)
 
 
@@ -338,7 +362,11 @@ async def test_shift_to_expired() -> None:
     async with timeout_at(t0 + 0.001) as cm:
         with pytest.raises(asyncio.CancelledError):
             await asyncio.sleep(10)
-        with pytest.raises(RuntimeError, match="cannot reschedule expired timeout"):
+        with pytest.raises(
+                RuntimeError,
+                match=("(cannot reschedule expired timeout)|"
+                       "(Cannot change state of expiring Timeout)")
+        ):
             cm.update(t0 + 10)
 
 
@@ -347,7 +375,9 @@ async def test_shift_by_after_cm_exit() -> None:
     async with timeout(1) as cm:
         await asyncio.sleep(0)
     with pytest.raises(
-        RuntimeError, match="cannot reschedule after exit from context manager"
+        RuntimeError,
+        match=("(cannot reschedule after exit from context manager)|"
+            "(Cannot change state of finished Timeout)")
     ):
         cm.shift(1)
 
@@ -357,6 +387,8 @@ async def test_enter_twice() -> None:
     async with timeout(10) as t:
         await asyncio.sleep(0)
 
-    with pytest.raises(RuntimeError, match="invalid state EXIT"):
+    with pytest.raises(
+        RuntimeError, match="(invalid state EXIT)|(Timeout has already been entered)"
+    ):
         async with t:
             await asyncio.sleep(0)
