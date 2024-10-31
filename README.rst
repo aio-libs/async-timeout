@@ -69,12 +69,13 @@ Please note: it is not POSIX time but a time with
 undefined starting base, e.g. the time of the system power on.
 
 
-Context manager has ``.expired`` property for check if timeout happens
+Context manager has ``.expired()`` / ``.expired`` for check if timeout happens
 exactly in context manager::
 
    async with timeout(1.5) as cm:
        await inner()
-   print(cm.expired)
+   print(cm.expired())  # recommended api
+   print(cm.expired)    # compatible api
 
 The property is ``True`` if ``inner()`` execution is cancelled by
 timeout context manager.
@@ -82,20 +83,32 @@ timeout context manager.
 If ``inner()`` call explicitly raises ``TimeoutError`` ``cm.expired``
 is ``False``.
 
-The scheduled deadline time is available as ``.deadline`` property::
+The scheduled deadline time is available as ``.when()`` / ``.deadline``::
 
    async with timeout(1.5) as cm:
-       cm.deadline
+       cm.when()    # recommended api
+       cm.deadline  # compatible api
 
-Not finished yet timeout can be rescheduled by ``shift_by()``
-or ``shift_to()`` methods::
+Not finished yet timeout can be rescheduled by ``shift()``
+or ``update()`` methods::
 
    async with timeout(1.5) as cm:
+       # recommended api
+       cm.reschedule(cm.when() + 1)  # add another second on waiting
+       # compatible api
        cm.shift(1)  # add another second on waiting
        cm.update(loop.time() + 5)  # reschedule to now+5 seconds
 
 Rescheduling is forbidden if the timeout is expired or after exit from ``async with``
 code block.
+
+
+Disable scheduled timeout::
+
+   async with timeout(1.5) as cm:
+       cm.reschedule(None)  # recommended api
+       cm.reject()          # compatible api
+
 
 
 Installation
