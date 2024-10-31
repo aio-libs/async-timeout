@@ -70,6 +70,7 @@ class _State(enum.Enum):
 
 
 if sys.version_info >= (3, 11):
+
     class _Expired:
         __slots__ = ("_val",)
 
@@ -87,7 +88,6 @@ if sys.version_info >= (3, 11):
 
         def __str__(self) -> str:
             return str(self._val)
-
 
     @final
     class Timeout(asyncio.Timeout):  # type: ignore[misc]
