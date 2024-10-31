@@ -1,1 +1,0 @@
-Make ``asyncio_timeout`` fully compatible with the standard ``asyncio.Timeout`` but keep backward compatibility with existing ``asyncio_timeout.Timeout`` API.

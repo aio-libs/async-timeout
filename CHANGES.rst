@@ -4,6 +4,28 @@ CHANGES
 
 .. towncrier release notes start
 
+5.0.0 (2024-10-31)
+==================
+
+Features
+--------
+
+- Make ``asyncio_timeout`` fully compatible with the standard ``asyncio.Timeout`` but keep backward compatibility with existing ``asyncio_timeout.Timeout`` API. (`#422 <https://github.com/aio-libs/async-timeout/issues/422>`_)
+
+
+Improved Documentation
+----------------------
+
+- On the `CHANGES/README.rst <https://github.com/aio-libs/async-timeout/tree/master/CHANGES/README.rst>`_ page,
+  a link to the ``Towncrier philosophy`` has been fixed. (`#388 <https://github.com/aio-libs/async-timeout/issues/388>`_)
+
+
+Deprecations and Removals
+-------------------------
+
+- Drop deprecated sync context manager support, use ``async with timeout(...): ...`` instead. (`#421 <https://github.com/aio-libs/async-timeout/issues/421>`_)
+
+
 4.0.3 (2023-08-10)
 ==================
 
