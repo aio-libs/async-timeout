@@ -5,18 +5,7 @@ from types import TracebackType
 from typing import Optional, Type, final
 
 
-if sys.version_info >= (3, 11):
-
-    def _uncancel_task(task: "asyncio.Task[object]") -> None:
-        task.uncancel()
-
-else:
-
-    def _uncancel_task(task: "asyncio.Task[object]") -> None:
-        pass
-
-
-__version__ = "4.0.3"
+__version__ = "5.0.0"
 
 
 __all__ = ("timeout", "timeout_at", "Timeout")
@@ -271,7 +260,6 @@ else:
         def _do_exit(self, exc_type: Optional[Type[BaseException]]) -> None:
             if exc_type is asyncio.CancelledError and self._state == _State.TIMEOUT:
                 assert self._task is not None
-                _uncancel_task(self._task)
                 self._timeout_handler = None
                 self._task = None
                 raise asyncio.TimeoutError
