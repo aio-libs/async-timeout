@@ -1,5 +1,5 @@
 -e .
-build==1.2.1
+build==1.2.2.post1
 docutils==0.20.1
 mypy==1.10.0; implementation_name=="cpython"
 pre-commit==4.0.1
