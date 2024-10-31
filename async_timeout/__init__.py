@@ -3,10 +3,7 @@ import enum
 import sys
 import warnings
 from types import TracebackType
-from typing import Optional, Type
-
-
-from typing import final
+from typing import Optional, Type, final
 
 
 if sys.version_info >= (3, 11):
@@ -20,7 +17,7 @@ else:
         pass
 
 
-__version__ = "4.0.3"
+__version__ = "5.0.0"
 
 
 __all__ = ("timeout", "timeout_at", "Timeout")
@@ -106,24 +103,6 @@ class Timeout:
             self._deadline = None  # type: Optional[float]
         else:
             self.update(deadline)
-
-    def __enter__(self) -> "Timeout":
-        warnings.warn(
-            "with timeout() is deprecated, use async with timeout() instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        self._do_enter()
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[Type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> Optional[bool]:
-        self._do_exit(exc_type)
-        return None
 
     async def __aenter__(self) -> "Timeout":
         self._do_enter()
