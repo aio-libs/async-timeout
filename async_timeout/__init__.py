@@ -100,7 +100,7 @@ if sys.version_info >= (3, 11):
             super().__init__(deadline)
 
         @property
-        def expired(self) -> bool:
+        def expired(self) -> _Expired:
             # a hacky property hat can provide both roles:
             # timeout.expired()  from asyncio
             # timeout.expired    from asyncio_timeout
