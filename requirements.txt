@@ -6,4 +6,4 @@ pre-commit==2.21.0
 pytest==7.4.4
 pytest-asyncio==0.21.1
 pytest-cov==4.1.0
-twine==4.0.2
+twine==5.1.0
