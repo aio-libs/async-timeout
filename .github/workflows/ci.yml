@@ -22,13 +22,13 @@ jobs:
     timeout-minutes: 30 # pre-commit env update can take time
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Setup Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: 3.x
     - name: Cache PyPI
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         key: pip-lint-${{ hashFiles('requirements.txt') }}
         path: ~/.cache/pip
@@ -58,17 +58,18 @@ jobs:
     timeout-minutes: 15
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Setup Python ${{ matrix.pyver }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.pyver }}
     - name: Get pip cache dir
       id: pip-cache
       run: |
-        echo "::set-output name=dir::$(pip cache dir)"    # - name: Cache
+        echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT    # - name: Cache
+      shell: bash
     - name: Cache PyPI
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         key: pip-ci-${{ runner.os }}-${{ matrix.pyver }}-${{ hashFiles('requirements/*.txt') }}
         path: ${{ steps.pip-cache.outputs.dir }}
@@ -98,9 +99,9 @@ jobs:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Setup Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: 3.x
     - name: Install dependencies
