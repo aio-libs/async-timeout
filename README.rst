@@ -29,6 +29,14 @@ Anyway, using upstream is highly recommended. ``asyncio_timeout`` exists only fo
 sake of backward compatibility, easy supporting both old and new Python by the same
 code, and easy misgration.
 
+If rescheduling API is not important and only ``async with timeout(...): ...`` functionality is required, 
+a user could apply conditional import::
+
+    if sys.version_info >= (3, 11):
+        from asyncio import timeout, timeout_at
+    else:
+        from async_timeout import timeout, timeout_at
+
 
 Usage example
 -------------
