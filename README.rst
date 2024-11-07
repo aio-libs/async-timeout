@@ -44,7 +44,7 @@ logic around block of code or in cases when ``asyncio.wait_for()`` is
 not suitable. Also it's much faster than ``asyncio.wait_for()``
 because ``timeout`` doesn't create a new task.
 
-The ``timeout(delay, *, loop=None)`` call returns a context manager
+The ``timeout(delay)`` call returns a context manager
 that cancels a block on *timeout* expiring::
 
    from async_timeout import timeout
