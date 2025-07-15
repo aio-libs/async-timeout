@@ -41,11 +41,11 @@ repos:
     files: |
       .gitignore
 - repo: https://github.com/asottile/pyupgrade
-  rev: 'v3.19.1'
+  rev: 'v3.20.0'
   hooks:
   - id: pyupgrade
     args: ['--py36-plus']
 - repo: https://github.com/PyCQA/flake8
-  rev: '7.1.2'
+  rev: '7.3.0'
   hooks:
   - id: flake8
