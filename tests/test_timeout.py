@@ -8,7 +8,6 @@ import pytest
 
 from async_timeout import timeout, timeout_at
 
-
 _Func = TypeVar("_Func", bound=Callable[..., Any])
 
 

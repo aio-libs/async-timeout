@@ -4,7 +4,6 @@ import sys
 from types import TracebackType
 from typing import Optional, Type, final
 
-
 __version__ = "5.0.1"
 
 
